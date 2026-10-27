@@ -21,24 +21,37 @@ export function resizePip(win: Window, size: PipSize) {
   }
 }
 
+const COPIED_ATTR = 'data-pip-copied'
+
 // 원래 페이지의 스타일을 PiP 문서로 복사한다. PiP는 빈 문서로 열리기 때문.
+// 다시 부르면 이전 복사본을 지우고 새로 복사한다.
 function copyStyles(target: Window) {
+  target.document.head.querySelectorAll(`[${COPIED_ATTR}]`).forEach((el) => el.remove())
   for (const sheet of Array.from(document.styleSheets)) {
     try {
       const css = Array.from(sheet.cssRules).map((r) => r.cssText).join('\n')
       const style = target.document.createElement('style')
+      style.setAttribute(COPIED_ATTR, '')
       style.textContent = css
       target.document.head.appendChild(style)
     } catch {
       // 교차 출처 스타일시트는 cssRules 접근이 막히므로 link로 연결
       if (sheet.href) {
         const link = target.document.createElement('link')
+        link.setAttribute(COPIED_ATTR, '')
         link.rel = 'stylesheet'
         link.href = sheet.href
         target.document.head.appendChild(link)
       }
     }
   }
+}
+
+// 원래 페이지 스타일이 바뀌면(개발 중 HMR 등) PiP에도 다시 복사한다. 반환값은 정리 함수.
+function syncStyles(target: Window) {
+  const observer = new MutationObserver(() => copyStyles(target))
+  observer.observe(document.head, { childList: true, subtree: true, characterData: true })
+  return () => observer.disconnect()
 }
 
 export function usePip(onClosed?: () => void) {
@@ -57,8 +70,10 @@ export function usePip(onClosed?: () => void) {
       try {
         const win = await api.requestWindow(size)
         copyStyles(win)
+        const stopSync = syncStyles(win)
         win.document.title = '다음으로'
         win.addEventListener('pagehide', () => {
+          stopSync()
           setPipWindow(null)
           setStatus('closed')
           onClosed?.()

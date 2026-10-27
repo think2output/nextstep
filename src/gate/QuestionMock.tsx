@@ -1,72 +1,90 @@
 // 질문 탭 크기 체감용 목업 (PRD 8.6). 서버 전송 없음, 새로고침하면 사라진다.
-// 작은 창(240×160)에서 목록을 먼저 보여주고, 쓰기 화면에서는 비슷한 질문을 제안해 중복을 줄인다.
-// 비슷한 질문 제안은 사용자가 고르는 것이며 자동 병합이 아니다 (PRD 3.3 제외 범위: 자동 질문 병합).
+// 입력칸 하나로 찾기와 쓰기를 겸한다: 쓰는 동안 목록이 비슷한 질문만 남아 중복 질문을 줄인다.
+// 비슷한 질문 표시는 사용자가 고르는 것이며 자동 병합이 아니다 (PRD 3.3 제외 범위: 자동 질문 병합).
 import { useMemo, useState } from 'react'
 
 const MAX_LEN = 200
-const SIMILAR_MIN_CHARS = 4
-const SIMILAR_THRESHOLD = 0.2
-const SIMILAR_MAX = 3
+const SEARCH_MIN_CHARS = 2
+const MATCH_THRESHOLD = 0.5
 
-type MockQuestion = { id: number; body: string; time: string; count: number; mine: boolean; reacted: boolean }
+type MockQuestion = { id: number; body: string; createdAt: number; count: number; mine: boolean; reacted: boolean }
+type Sort = 'popular' | 'latest'
 
+const BASE = Date.now()
 const SAMPLES: MockQuestion[] = [
-  { id: 8, body: 'useEffect 의존성 배열에 함수를 넣으면 왜 계속 실행되나요?', time: '14:58', count: 4, mine: false, reacted: false },
-  { id: 7, body: 'npm install 하면 빨간 글씨 경고가 엄청 뜨는데 무시해도 되나요?', time: '14:55', count: 3, mine: false, reacted: false },
-  { id: 6, body: 'git push 할 때 rejected 뜨는데 pull 먼저 해야 하나요?', time: '14:50', count: 2, mine: false, reacted: true },
-  { id: 5, body: '.env 파일은 깃허브에 올리면 안 되는 거죠?', time: '14:47', count: 5, mine: false, reacted: false },
-  { id: 4, body: 'props랑 state 차이를 한 번만 더 설명해주실 수 있나요?', time: '14:44', count: 1, mine: false, reacted: false },
-  { id: 3, body: 'VS Code에서 자동 저장 켜는 방법이 뭔가요?', time: '14:38', count: 0, mine: false, reacted: false },
-  { id: 2, body: '방금 설명하신 부분 코드 다시 보여주실 수 있나요?', time: '14:31', count: 0, mine: false, reacted: false },
-  { id: 1, body: 'useEffect 안에서 async 함수 쓰면 왜 에러 나요?', time: '14:20', count: 2, mine: false, reacted: false },
-]
+  ['useEffect 의존성 배열에 함수를 넣으면 왜 계속 실행되나요?', 4],
+  ['npm install 하면 빨간 글씨 경고가 엄청 뜨는데 무시해도 되나요? 설치는 끝까지 된 것 같은데 실행할 때 문제가 생길 수도 있는지, 경고 중에 꼭 봐야 하는 게 있는지 궁금합니다.', 3],
+  ['git push 할 때 rejected 뜨는데 pull 먼저 해야 하나요?', 2],
+  ['.env 파일은 깃허브에 올리면 안 되는 거죠?', 5],
+  ['props랑 state 차이를 한 번만 더 설명해주실 수 있나요?', 1],
+  ['VS Code에서 자동 저장 켜는 방법이 뭔가요?', 0],
+  ['방금 설명하신 부분 코드 다시 보여주실 수 있나요?', 0],
+  ['useEffect 안에서 async 함수 쓰면 왜 에러 나요?', 2],
+].map(([body, count], i) => ({
+  id: i + 1,
+  body: body as string,
+  createdAt: BASE - i * 4 * 60_000,
+  count: count as number,
+  mine: false,
+  reacted: i === 2,
+}))
 
-function hhmm() {
-  return new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
+function hhmm(t: number) {
+  return new Date(t).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
-// 공백·문장부호를 뺀 두 글자 묶음으로 겹치는 정도를 본다 (한국어 조사 차이에 덜 민감)
+function normalize(text: string) {
+  return text.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '')
+}
+
 function bigrams(text: string) {
-  const chars = Array.from(text.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, ''))
+  const chars = Array.from(normalize(text))
   const set = new Set<string>()
   for (let i = 0; i < chars.length - 1; i++) set.add(chars[i] + chars[i + 1])
   return set
 }
 
-function similarity(a: Set<string>, b: Set<string>) {
-  if (a.size === 0 || b.size === 0) return 0
+// 검색어가 질문에 얼마나 들어 있는지 (0~1). 영어 단어는 일부만 맞아도 찾는다 (use → useEffect).
+function matchScore(query: string, body: string) {
+  const words = query.toLowerCase().match(/[a-z0-9]{2,}/g) ?? []
+  const lowerBody = body.toLowerCase()
+  const wordHit = words.length > 0 && words.every((w) => lowerBody.includes(w))
+  const q = bigrams(query)
+  if (q.size === 0) return wordHit ? 1 : 0
+  const b = bigrams(body)
   let common = 0
-  for (const g of a) if (b.has(g)) common++
-  return common / Math.min(a.size, b.size)
+  for (const g of q) if (b.has(g)) common++
+  return Math.max(common / q.size, wordHit ? 1 : 0)
 }
 
 export default function QuestionMock() {
-  const [mode, setMode] = useState<'list' | 'write'>('list')
   const [draft, setDraft] = useState('')
   const [list, setList] = useState(SAMPLES)
+  const [sort, setSort] = useState<Sort>('popular')
   const [openId, setOpenId] = useState<number | null>(null)
   const len = Array.from(draft.trim()).length
+  const searching = len >= SEARCH_MIN_CHARS
 
-  const similar = useMemo(() => {
-    if (len < SIMILAR_MIN_CHARS) return []
-    const d = bigrams(draft)
-    return list
-      .filter((q) => !q.mine)
-      .map((q) => ({ q, score: similarity(d, bigrams(q.body)) }))
-      .filter((x) => x.score >= SIMILAR_THRESHOLD)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, SIMILAR_MAX)
-      .map((x) => x.q)
-  }, [draft, len, list])
+  const shown = useMemo(() => {
+    if (searching) {
+      return list
+        .map((q) => ({ q, score: matchScore(draft.trim(), q.body) }))
+        .filter((x) => x.score >= MATCH_THRESHOLD)
+        .sort((a, b) => b.score - a.score || b.q.count - a.q.count)
+        .map((x) => x.q)
+    }
+    return [...list].sort((a, b) =>
+      sort === 'popular' ? b.count - a.count || a.createdAt - b.createdAt : b.createdAt - a.createdAt,
+    )
+  }, [draft, searching, list, sort])
 
   const submit = () => {
     if (len < 1 || len > MAX_LEN) return
     setList((prev) => [
-      { id: Date.now(), body: draft.trim(), time: hhmm(), count: 0, mine: true, reacted: false },
+      { id: Date.now(), body: draft.trim(), createdAt: Date.now(), count: 0, mine: true, reacted: false },
       ...prev,
     ])
     setDraft('')
-    setMode('list')
   }
 
   const toggle = (id: number) =>
@@ -74,70 +92,68 @@ export default function QuestionMock() {
       prev.map((q) => (q.id === id ? { ...q, reacted: !q.reacted, count: q.count + (q.reacted ? -1 : 1) } : q)),
     )
 
-  const reactButton = (q: MockQuestion) =>
-    q.mine ? (
-      <span className="hint qm-react">내 질문 🙋{q.count}</span>
-    ) : (
-      <button
-        type="button"
-        className="qm-react"
-        aria-pressed={q.reacted}
-        aria-label={`저도 궁금해요 ${q.count}`}
-        onClick={() => toggle(q.id)}
-      >
-        🙋{q.count}
-      </button>
-    )
-
-  if (mode === 'write') {
-    return (
-      <div className="qm">
-        <div className="qm-row">
-          <button type="button" onClick={() => setMode('list')}>← 목록</button>
-          <span className={len > MAX_LEN ? 'error' : 'hint'}>{len}/{MAX_LEN}</span>
-          <button type="button" disabled={len < 1 || len > MAX_LEN} onClick={submit}>남기기</button>
-        </div>
+  return (
+    <div className="qm">
+      <div className="qm-compose">
         <textarea
           className="qm-input"
           value={draft}
           maxLength={MAX_LEN * 2}
-          placeholder="궁금한 점을 익명으로 남겨주세요 (이름·API 키 X)"
+          rows={1}
+          placeholder="질문 쓰기 · 비슷한 질문 찾기"
+          aria-label="질문 입력. 쓰는 동안 비슷한 질문이 아래에 표시됩니다"
           onChange={(e) => setDraft(e.target.value)}
         />
-        {similar.length > 0 && (
-          <div className="qm-similar" aria-live="polite">
-            <p className="qm-similar-title">비슷한 질문이 있어요. 같으면 🙋를 눌러주세요</p>
-            <ul className="qm-list">
-              {similar.map((q) => (
-                <li key={q.id} className="qm-item">
-                  <span className="qm-line qm-open">{q.body}</span>
-                  {reactButton(q)}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <button type="button" disabled={len < 1 || len > MAX_LEN} onClick={submit}>남기기</button>
+      </div>
+
+      <div className="qm-head" aria-live="polite">
+        {searching ? (
+          <>
+            <span>{shown.length > 0 ? `비슷한 질문 ${shown.length} · 같으면 🙋` : '비슷한 질문 없음 · 남겨주세요'}</span>
+            <span className={len > MAX_LEN ? 'error' : 'hint'}>{len}/{MAX_LEN}</span>
+          </>
+        ) : (
+          <>
+            <span className="hint">질문 {list.length} · 이름·API 키 X</span>
+            <button type="button" onClick={() => setSort(sort === 'popular' ? 'latest' : 'popular')}>
+              {sort === 'popular' ? '🙋많은순' : '최신순'} ⇅
+            </button>
+          </>
         )}
       </div>
-    )
-  }
 
-  return (
-    <div className="qm">
-      <button type="button" className="qm-write" onClick={() => setMode('write')}>✏ 질문 쓰기</button>
       <ul className="qm-list">
-        {list.map((q) => (
-          <li key={q.id} className="qm-item">
-            <button
-              type="button"
-              className={`qm-line${openId === q.id ? ' qm-open' : ''}`}
-              aria-expanded={openId === q.id}
-              onClick={() => setOpenId(openId === q.id ? null : q.id)}
-            >
-              {q.body}
-            </button>
-            {reactButton(q)}
-          </li>
-        ))}
+        {shown.map((q) => {
+          const open = openId === q.id
+          return (
+            <li key={q.id} className="qm-item">
+              <button
+                type="button"
+                className={`qm-line${open ? ' qm-open' : ''}`}
+                aria-expanded={open}
+                title={q.body}
+                onClick={() => setOpenId(open ? null : q.id)}
+              >
+                {q.body}
+              </button>
+              {q.mine ? (
+                <span className="qm-react qm-mine" title="내 질문">나 🙋{q.count}</span>
+              ) : (
+                <button
+                  type="button"
+                  className="qm-react"
+                  aria-pressed={q.reacted}
+                  aria-label={`저도 궁금해요 ${q.count}`}
+                  title={`${hhmm(q.createdAt)} · 저도 궁금해요`}
+                  onClick={() => toggle(q.id)}
+                >
+                  🙋{q.count}
+                </button>
+              )}
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
