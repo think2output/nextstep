@@ -3,8 +3,23 @@ import { useCallback, useState } from 'react'
 // PRD 12.1 PiP 상태
 export type PipStatus = 'unsupported' | 'closed' | 'opening' | 'open' | 'failed'
 
-export const PIP_SIZE_DEFAULT = { width: 340, height: 280 } // PRD 8.2
-export const PIP_SIZE_QUESTION = { width: 380, height: 480 }
+export type PipSize = { width: number; height: number }
+
+// PRD 8.2 (v1.1)
+export const PIP_SIZE_DEFAULT: PipSize = { width: 240, height: 160 }
+export const PIP_SIZE_COMPACT: PipSize = { width: 200, height: 120 }
+export const PIP_SIZE_QUESTION: PipSize = { width: 380, height: 480 }
+
+// 작은 창 안의 버튼 클릭 핸들러에서만 호출한다 (Chrome은 PiP 창의 사용자 클릭이 있어야 크기 변경 허용).
+// resizeBy는 바깥 창 기준이라 현재 안쪽 크기와의 차이만큼 조정한다.
+export function resizePip(win: Window, size: PipSize) {
+  try {
+    win.resizeBy(size.width - win.innerWidth, size.height - win.innerHeight)
+    return true
+  } catch {
+    return false
+  }
+}
 
 // 원래 페이지의 스타일을 PiP 문서로 복사한다. PiP는 빈 문서로 열리기 때문.
 function copyStyles(target: Window) {

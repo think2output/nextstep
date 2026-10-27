@@ -2,16 +2,16 @@
 // 서버 통신 없음: G5·G6·G8의 기기 간 시험은 Supabase 연결 후 별도 진행.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { PIP_SIZE_DEFAULT, PIP_SIZE_QUESTION, usePip } from '../pip/usePip'
+import {
+  PIP_SIZE_COMPACT,
+  PIP_SIZE_DEFAULT,
+  PIP_SIZE_QUESTION,
+  resizePip,
+  type PipSize,
+  usePip,
+} from '../pip/usePip'
 
-// 더 작은 크기는 기본값 변경 검토용 (PRD 8.2 기본 340×280). 브라우저가 최소 크기로 보정할 수 있다.
-const SIZE_OPTIONS = [
-  { label: '기본', ...PIP_SIZE_DEFAULT },
-  { label: '질문용', ...PIP_SIZE_QUESTION },
-  { label: '작게', width: 280, height: 200 },
-  { label: '더 작게', width: 240, height: 160 },
-  { label: '최소 시험', width: 200, height: 120 },
-]
+type Tab = 'answer' | 'question'
 
 const AUTO_REQUEST_MS = 10_000
 const TICK_MS = 1_000
@@ -36,6 +36,8 @@ export default function GatePage() {
   const [requestNo, setRequestNo] = useState(0)
   const requestCounter = useRef(0)
   const [pipSize, setPipSize] = useState('')
+  const [tab, setTab] = useState<Tab>('answer')
+  const [compact, setCompact] = useState(false)
   const [maxGapMs, setMaxGapMs] = useState(0)
 
   // 원래 탭 보임/포커스 기록
@@ -114,15 +116,54 @@ export default function GatePage() {
     addLog('기록 복사함')
   }
 
+  const resizeTo = (size: PipSize) => {
+    if (!pipWindow) return
+    const ok = resizePip(pipWindow, size)
+    addLog(ok ? `크기 변경 요청 ${size.width}×${size.height}` : '크기 변경 실패')
+  }
+
+  // 질문 탭은 사용자가 눌렀을 때만 크게 (PRD 8.2). 응답 탭으로 오면 이전 크기로.
+  const changeTab = (next: Tab) => {
+    if (next === tab) return
+    setTab(next)
+    resizeTo(next === 'question' ? PIP_SIZE_QUESTION : compact ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
+  }
+
+  const toggleCompact = () => {
+    const next = !compact
+    setCompact(next)
+    resizeTo(next ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
+  }
+
   const pipContent = (
-    <div className="pip">
-      <p className="pip-q">{requestNo > 0 ? `요청 #${requestNo}: 실습할 준비가 됐나요?` : '실습할 준비가 됐나요?'}</p>
-      <div className="pip-buttons">
-        <button type="button" onClick={() => answer('yes')}>준비됐어요</button>
-        <button type="button" onClick={() => answer('no')}>잠시만요</button>
+    <div className={`pip${compact && tab === 'answer' ? ' pip-compact' : ''}`}>
+      <div className="pip-tabs">
+        <button type="button" aria-pressed={tab === 'answer'} onClick={() => changeTab('answer')}>응답</button>
+        <button type="button" aria-pressed={tab === 'question'} onClick={() => changeTab('question')}>질문</button>
+        {tab === 'answer' && (
+          <button
+            type="button"
+            className="pip-size"
+            aria-label={compact ? '기본 크기로' : '더 작게'}
+            title={compact ? '기본 크기로' : '더 작게'}
+            onClick={toggleCompact}
+          >
+            {compact ? '⤢' : '⤡'}
+          </button>
+        )}
       </div>
-      <p className="pip-count">준비됐어요 {yes} · 잠시만요 {no}</p>
-      <p className="pip-meta">창 크기 {pipSize}</p>
+      {tab === 'answer' ? (
+        <>
+          <p className="pip-q">{requestNo > 0 ? `#${requestNo} 실습할 준비가 됐나요?` : '실습할 준비가 됐나요?'}</p>
+          <div className="pip-buttons">
+            <button type="button" onClick={() => answer('yes')}>준비됐어요</button>
+            <button type="button" onClick={() => answer('no')}>잠시만요</button>
+          </div>
+          <p className="pip-count">준비됐어요 {yes} · 잠시만요 {no}</p>
+        </>
+      ) : (
+        <p className="pip-q">질문 탭 자리 (크기 시험용)</p>
+      )}
     </div>
   )
 
@@ -137,19 +178,18 @@ export default function GatePage() {
           {' · '}상태: <strong>{status}</strong>
         </p>
         {error && <p className="error">열기 실패: {error}</p>}
-        <div className="row">
-          {SIZE_OPTIONS.map((s) => (
-            <button
-              key={s.label}
-              type="button"
-              disabled={status !== 'closed' && status !== 'failed'}
-              onClick={() => open({ width: s.width, height: s.height })}
-            >
-              {s.label} ({s.width}×{s.height})
-            </button>
-          ))}
-        </div>
-        <p className="hint">작은 창 모서리를 끌어서 크기를 바꿀 수도 있어요. 실제 크기는 작은 창 맨 아래에 나와요.</p>
+        <button
+          type="button"
+          disabled={status !== 'closed' && status !== 'failed'}
+          onClick={() => {
+            setTab('answer')
+            setCompact(false)
+            open(PIP_SIZE_DEFAULT)
+          }}
+        >
+          작은 창 띄우기
+        </button>
+        {status === 'open' && <p>작은 창 실제 크기: <strong>{pipSize}</strong></p>}
         {status === 'open' && <p className="hint">작은 창을 사용하는 동안 이 탭은 닫지 마세요.</p>}
       </section>
 

@@ -73,4 +73,4 @@ question_status_changed, question_hidden, room_ended, membership_changed.
 
 정원 학생 30 / 수업명 1~30자 / 질문 1~200자 / heartbeat 15초, 미확인 45초 / 쓰기 타임아웃 8초 /
 방 최대 12시간 / 종료 후 읽기 24시간, 25시간 내 삭제 / 질문 10초 간격, 학생 20개, 방 300개 /
-PiP 기본 340×280, 질문 380×480, 최소 280×220.
+PiP 기본 240×160, 더 작게 200×120, 질문 380×480 (PRD v1.1).

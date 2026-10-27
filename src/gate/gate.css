@@ -73,53 +73,67 @@ button:disabled {
   word-break: break-all;
 }
 
-/* 작은 창 내용 (PRD 8.3·8.4) */
+/* 작은 창 내용 (PRD 8.2~8.4). 기본 240×160, 더 작게 200×120, 질문 380×480 */
 .pip {
-  padding: 12px;
+  padding: 6px;
   box-sizing: border-box;
 }
 
+.pip-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.pip-tabs button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.pip-tabs button[aria-pressed='true'] {
+  border-color: var(--accent);
+  border-width: 2px;
+  font-weight: 700;
+}
+
+.pip-tabs .pip-size {
+  margin-left: auto;
+  min-width: 32px;
+  padding: 0;
+}
+
 .pip-q {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  margin: 0 0 12px;
-  overflow-wrap: anywhere;
+  margin: 0 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pip-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 4px;
 }
 
-.pip-count,
-.pip-meta {
-  margin: 10px 0 0;
+.pip-buttons button {
+  padding: 0 4px;
+  font-size: 13px;
 }
 
-.pip-meta {
-  color: var(--muted);
+.pip-count {
+  margin: 6px 0 0;
   font-size: 12px;
+  color: var(--muted);
 }
 
-/* 아주 작은 창: 여백을 줄이고 줄바꿈을 줄인다. 버튼 높이 44px은 유지 (PRD 8.3) */
-@media (max-width: 279px), (max-height: 219px) {
-  .pip {
-    padding: 6px;
-  }
+/* 더 작게: 집계 줄을 숨겨 200×120 안에 탭·질문·버튼만 */
+.pip-compact .pip-count {
+  display: none;
+}
 
-  .pip-q {
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
-
-  .pip-buttons button {
-    padding: 0 6px;
-  }
-
-  .pip-count,
-  .pip-meta {
-    margin-top: 4px;
-    font-size: 12px;
-  }
+.pip-compact .pip-tabs {
+  margin-bottom: 4px;
 }
