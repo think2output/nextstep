@@ -1,11 +1,14 @@
 // S02~S04, S09: 방 화면(원래 탭). 작은 창이 열려 있으면 이 탭은 상태·다시 열기 안내 중심 (PIP-02).
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { navigate } from '../app/router'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, usePip } from '../pip/usePip'
 import PipView, { type PipTab } from '../room/PipView'
 import { useRoom } from '../room/useRoom'
-import { errorText } from '../shared/domain'
+import { copyText } from '../lib/clipboard'
+import { call } from '../lib/rpc'
+import { RoundStats } from '../room/AnswerViews'
+import { ROUND_TEXT, errorText, type HostRound } from '../shared/domain'
 
 function draftKey(roomId: string) {
   return `nextstep:draft:${roomId}`
@@ -25,7 +28,6 @@ export default function RoomPage({ roomId }: { roomId: string }) {
   const pip = usePip()
   const [tab, setTab] = useState<PipTab>('answer')
   const [compact, setCompact] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [ending, setEnding] = useState(false)
   const [endError, setEndError] = useState<string | null>(null)
 
@@ -96,7 +98,7 @@ export default function RoomPage({ roomId }: { roomId: string }) {
 
       {ended && <p className="notice">수업 방이 종료됐어요. 종료 후 24시간 동안 읽기만 가능해요.</p>}
 
-      {isHost && joinCode && !ended && <HostShare joinCode={joinCode} copied={copied} setCopied={setCopied} />}
+      {isHost && joinCode && !ended && <HostShare joinCode={joinCode} />}
 
       <section className="section stack">
         <h2 className="section-title">작은 창</h2>
@@ -123,6 +125,8 @@ export default function RoomPage({ roomId }: { roomId: string }) {
         {pip.status !== 'open' && <div className="pip-frame">{view}</div>}
       </section>
 
+      {isHost && <RoundHistory roomId={roomId} lastClosedId={snap.latest_closed_round?.id ?? null} />}
+
       {isHost && !ended && (
         <section className="section stack">
           {endError && <p className="error-text">{endError}</p>}
@@ -138,31 +142,77 @@ export default function RoomPage({ roomId }: { roomId: string }) {
   )
 }
 
-function HostShare({
-  joinCode,
-  copied,
-  setCopied,
-}: {
-  joinCode: string
-  copied: boolean
-  setCopied: (v: boolean) => void
-}) {
+function HostShare({ joinCode }: { joinCode: string }) {
   const link = `${window.location.origin}/join?code=${joinCode}`
-  const copy = async () => {
-    await navigator.clipboard.writeText(link)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const [result, setResult] = useState<{ what: 'code' | 'link'; ok: boolean } | null>(null)
+
+  const copy = async (what: 'code' | 'link') => {
+    const ok = await copyText(what === 'code' ? joinCode : link)
+    setResult({ what, ok })
+    if (ok) setTimeout(() => setResult(null), 2000)
   }
+  const label = (what: 'code' | 'link', text: string) =>
+    result?.what === what && result.ok ? '✓ 복사했어요' : text
+
   return (
     <section className="card stack">
       <span className="field-label">참여 코드</span>
       <span className="code-big">{joinCode}</span>
       <div className="row">
-        <button type="button" className="btn btn-weak btn-s" onClick={() => void copy()}>
-          {copied ? '✓ 복사했어요' : '참여 링크 복사'}
+        <button type="button" className="btn btn-weak btn-s" onClick={() => void copy('link')}>
+          {label('link', '참여 링크 복사')}
+        </button>
+        <button type="button" className="btn btn-grey btn-s" onClick={() => void copy('code')}>
+          {label('code', '코드만 복사')}
         </button>
       </div>
+      {result && !result.ok && (
+        <p className="error-text" role="alert">복사하지 못했어요. 아래 링크를 직접 선택해서 복사해주세요.</p>
+      )}
+      <input
+        className="input share-link"
+        readOnly
+        value={link}
+        aria-label="참여 링크"
+        onFocus={(e) => e.currentTarget.select()}
+      />
       <p className="muted">링크를 젭 채팅에 올려주세요. 코드는 수업 밖에 공유하지 마세요.</p>
+    </section>
+  )
+}
+
+// 지난 확인 기록 (사용자 피드백 2). 마지막으로 닫힌 회차가 바뀔 때 다시 불러온다.
+function RoundHistory({ roomId, lastClosedId }: { roomId: string; lastClosedId: string | null }) {
+  const [rounds, setRounds] = useState<HostRound[] | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void call<{ rounds: HostRound[] }>('get_round_history', { p_room_id: roomId, p_limit: 20 }).then((res) => {
+      if (!cancelled && res.ok) setRounds(res.data.rounds)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [roomId, lastClosedId])
+
+  if (!rounds || rounds.length === 0) return null
+  return (
+    <section className="section">
+      <h2 className="section-title">지난 확인 기록</h2>
+      <ol className="history">
+        {rounds.map((r) => (
+          <li key={r.id} className="history-item">
+            <div className="history-head">
+              <span>{ROUND_TEXT[r.type].label}</span>
+              <time dateTime={r.closed_at ?? undefined}>
+                {r.closed_at &&
+                  new Date(r.closed_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+              </time>
+            </div>
+            <RoundStats round={r} />
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }

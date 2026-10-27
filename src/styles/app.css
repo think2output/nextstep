@@ -770,3 +770,213 @@ button:disabled {
 .stack > h2 {
   margin: 0;
 }
+
+/* ───────── 강사 집계 % · 과반 (사용자 피드백 3) ───────── */
+.pv-stat-pct {
+  margin-left: 3px;
+  font-size: var(--pip-fs-meta);
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.pv-stat-yes .pv-stat-num {
+  color: var(--blue-600);
+}
+
+.pv-meter {
+  position: relative;
+  display: flex;
+  height: 6px;
+  margin: 6px 1px 0;
+  border-radius: 3px;
+  background: var(--grey-100);
+  overflow: hidden;
+}
+
+.pv-meter-yes {
+  background: var(--blue-500);
+}
+
+.pv-meter-no {
+  background: var(--grey-500);
+}
+
+/* 50% 표시선 */
+.pv-meter-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--grey-900);
+  opacity: 0.55;
+}
+
+.pv-majority {
+  margin: 3px 2px 6px;
+  font-size: var(--pip-fs-meta);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pv-compact .pv-majority {
+  margin-bottom: 4px;
+}
+
+/* ───────── 질문 줄 정렬·🙋 버튼 모양 (사용자 피드백 4) ───────── */
+.qv-item {
+  align-items: center;
+  padding: 2px 0;
+}
+
+.qv-item:has(.qv-line-open) {
+  align-items: flex-start;
+}
+
+.qv-react {
+  background: var(--grey-100);
+  color: var(--grey-700);
+  font-weight: 600;
+}
+
+.qv-react:hover:not(:disabled) {
+  background: var(--grey-200);
+}
+
+.qv-mini {
+  background: var(--grey-50);
+}
+
+/* ───────── 웹 화면 미리보기 (작은 창이 닫혀 있을 때, 사용자 피드백 6) ───────── */
+.pip-frame {
+  width: 100%;
+  min-height: 0;
+  border-radius: var(--radius-l);
+  --pip-pad: 14px;
+  --pip-tab-h: 36px;
+  --pip-btn-h: 56px;
+  --pip-icon: 36px;
+  --pip-row-h: 36px;
+  --pip-fs-q: 16px;
+  --pip-fs-list: 14px;
+  --pip-fs-meta: 13px;
+}
+
+.pip-frame .pv {
+  height: 420px;
+}
+
+.pip-frame .pv-tab,
+.pip-frame .pv-icon {
+  font-size: 15px;
+}
+
+.pip-frame .pv-action {
+  min-height: 48px;
+  font-size: 14px;
+}
+
+.pip-frame .pv-stat-num {
+  font-size: 24px;
+}
+
+.pip-frame .pv-meter {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.pip-frame .qv-input,
+.pip-frame .qv-send {
+  height: 44px;
+}
+
+.pip-frame .qv-send {
+  width: 44px;
+}
+
+.pip-frame .qv-line {
+  line-height: 22px;
+  padding: 7px 4px;
+}
+
+/* ───────── 강사 공유·기록 ───────── */
+.share-link {
+  font-size: var(--fs-small);
+  color: var(--text-sub);
+  min-height: 40px;
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  padding: 12px 14px 4px;
+  border-radius: var(--radius-m);
+  background: var(--grey-50);
+  --pip-fs-meta: 12px;
+}
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.history-head time {
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.history-item .pv-stat {
+  background: #fff;
+}
+
+/* 작은 창 기본 크기에서 강사 집계가 160px 높이에 들어가도록 */
+.pv-stat {
+  padding: 3px 2px;
+}
+
+.pv-stat-num {
+  font-size: 15px;
+}
+
+.pv-action {
+  min-height: 32px;
+}
+
+.pv-q-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.pv-q-row .pv-q {
+  flex: 1;
+  min-width: 0;
+  margin: 0 2px;
+}
+
+.pv-action-inline {
+  flex: none;
+  min-height: 28px;
+  padding: 0 10px;
+}
+
+.pip-frame .pv-action-inline {
+  min-height: 40px;
+  padding: 0 16px;
+}

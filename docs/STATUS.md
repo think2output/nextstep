@@ -34,6 +34,7 @@
 | 최대화·F11·젭 전체 화면에서 PiP | 보장 안 함 | GATE-01 | 미확인 |
 | 강사 질문 확인 운영 담당 | 쉬는 시간·종료 전 | 인터뷰 | 미확인 |
 | 배포 공급자 | HTTPS 정적 호스팅 | 2일차 | 미정 |
+| 재촉하기(미응답자 알림) | 미구현 | 사용자 | 방식 논의 중 (D-027) |
 | 질문 탭 확장 시 작은 창 위치 이동 | 창 크기 고정 + 찾기·쓰기 통합 (D-015, D-016) | 사용자 | 해결 |
 
 ## 제출물 (과제 요건)
@@ -61,3 +62,4 @@
 - 미구현·후속: telemetry 테이블(P1), Realtime 'public access' 끄기(GATE 시험 페이지가 공개 채널 사용 중이라 보류), 30명 정원 실측(AT06·AT56), 24시간 만료 경계 시험.
 - DEV03·04: src/pages(StartPage, RoomPage), src/room(useRoom 상태 저장소, PipView, AnswerViews, QuestionView), src/styles(TDS 참고 토큰). /gate는 시험 페이지로 분리(lazy). 강사 snapshot에 join_code 추가(migration 0300). tests/e2e/smoke.mjs(헤드리스 Chrome 2프로필) 통과. 실제 PiP 창에서의 확인은 사용자 몫.
 - 알려진 미흡: 학생은 답변 완료 질문 목록을 볼 수 없음(미답변만), 질문 50개 초과 '더 보기' 없음, 연결 미확인 30초 후 '다시 연결'은 채널만 재생성.
+- 사용자 피드백 반영: 복사 실패 대비(clipboard 대체 + 링크 직접 선택), 지난 확인 기록(migration 0400 get_round_history), 학생 지난 응답 표시, 강사 % · 과반 막대, 질문 줄·🙋 정렬·배경, 웹 미리보기 확대. smoke 9단계 통과(240×160 사진 확인).

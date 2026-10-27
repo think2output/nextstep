@@ -22,6 +22,24 @@ async function profile(name) {
   return page
 }
 
+// 원래 탭의 미리보기 틀을 작은 창 크기(240×160)·작은 창 글자 크기로 찍는다. 화면 상태는 바꾸지 않는다.
+async function pipShot(page, path) {
+  const frame = page.locator('.pip-frame')
+  const style = await page.addStyleTag({ content: `
+    .pip-frame { --pip-pad: 8px; --pip-tab-h: 30px; --pip-btn-h: 44px; --pip-icon: 30px; --pip-row-h: 28px;
+      --pip-fs-q: 13px; --pip-fs-list: 12px; --pip-fs-meta: 11px; width: 240px !important; border-radius: 0 }
+    .pip-frame .pv { height: 160px !important }
+    .pip-frame .pv-tab, .pip-frame .pv-icon { font-size: 13px }
+    .pip-frame .pv-action { min-height: 32px; font-size: 12px }
+    .pip-frame .pv-stat-num { font-size: 15px }
+    .pip-frame .pv-meter { height: 6px }
+    .pip-frame .qv-input, .pip-frame .qv-send { height: 32px }
+    .pip-frame .qv-send { width: 32px }
+    .pip-frame .qv-line { line-height: 18px; padding: 5px 2px }` })
+  await frame.screenshot({ path })
+  await style.evaluate((el) => el.remove())
+}
+
 try {
   // 강사: 방 만들기
   const host = await profile('host')
@@ -54,17 +72,34 @@ try {
   await student.getByText('‘준비됐어요’로 전달했어요').waitFor()
   step('학생 응답 전달 확인 표시')
 
-  // 강사: 집계 반영
-  const yesCell = host.locator('.pv-stat').first().locator('.pv-stat-num')
-  await host.waitForFunction((el) => el?.textContent === '1', await yesCell.elementHandle(), { timeout: 5_000 })
-  step('강사 집계 준비됨 1')
+  // 강사: 집계 반영 (대상 1명 중 1명 → 100%, 과반)
+  await host.getByText('✓ 과반이 ‘준비됨’ (100%)').waitFor({ timeout: 5_000 })
+  step('강사 집계 준비됨 1명·100%·과반 표시')
+  await pipShot(host, 'tests/e2e/pip-host-active.png')
+
+  // 강사: 확인 종료 → 지난 기록, 학생: 지난 응답 표시
+  await host.getByRole('button', { name: '확인 종료' }).click()
+  await host.getByRole('heading', { name: '지난 확인 기록' }).waitFor({ timeout: 5_000 })
+  await student.getByText('지난 준비 확인: ‘준비됐어요’로 응답했어요').waitFor({ timeout: 5_000 })
+  step('지난 확인 기록(강사)·지난 응답(학생) 표시')
 
   // 학생: 질문 남기기
   await student.getByRole('button', { name: /^질문/ }).click()
   await student.getByLabel(/익명 질문 입력/).fill('useEffect 왜 두 번 실행돼요?')
   await student.getByRole('button', { name: '질문 남기기' }).click()
-  await student.getByText('useEffect 왜 두 번 실행돼요?').waitFor()
+  await student.locator('.qv-item', { hasText: 'useEffect 왜 두 번 실행돼요?' }).waitFor()
   step('학생 질문 등록')
+
+  // 두 번째 학생: 다른 사람 질문에 🙋 (질문 줄·버튼 정렬 확인용 사진)
+  const student2 = await profile('student2')
+  await student2.goto(`${BASE}/join?code=${code}`)
+  await student2.getByRole('button', { name: '입장하기' }).click()
+  await student2.waitForURL(/\/room\//)
+  await student2.getByRole('button', { name: /^질문/ }).click()
+  await student2.getByRole('button', { name: '저도 궁금해요 0' }).click()
+  await student2.getByRole('button', { name: '저도 궁금해요 1' }).waitFor({ timeout: 5_000 })
+  step('다른 학생 🙋 공감 +1')
+  await pipShot(student2, 'tests/e2e/pip-student-question.png')
 
   // 강사: 질문 보이고 답변 완료
   await host.getByRole('button', { name: /^질문/ }).click()

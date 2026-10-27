@@ -96,6 +96,22 @@ describe('집계', () => {
     expect(hostSnap.active_round).toMatchObject({ yes_count: 0, no_count: 0, unanswered_count: 1 })
   })
 
+  it('지난 확인 기록: 강사는 닫힌 회차 집계를 최신순으로, 학생은 거절', async () => {
+    const { host, room, students } = await setupRoom(2)
+    const first = await startRound(host, room.room_id)
+    await rpc(students[0], 'set_response', { p_round_id: first, p_choice: 'yes', p_expected_version: 0, p_action_id: aid() })
+    await rpc(host, 'close_round', { p_round_id: first, p_action_id: aid() })
+    const second = await startRound(host, room.room_id, 'proceed')
+    await rpc(host, 'close_round', { p_round_id: second, p_action_id: aid() })
+
+    const res = await rpc(host, 'get_round_history', { p_room_id: room.room_id })
+    expect(res.data?.rounds.map((r: any) => r.id)).toEqual([second, first])
+    expect(res.data?.rounds[1]).toMatchObject({ type: 'ready', yes_count: 1, unanswered_count: 1, target_count: 2 })
+
+    const denied = await rpc(students[0], 'get_round_history', { p_room_id: room.room_id })
+    expect(denied.error?.code).toBe('FORBIDDEN')
+  })
+
   it('AT21 요청 후 입장한 학생은 대상 아님', async () => {
     const { host, room } = await setupRoom(1)
     const roundId = await startRound(host, room.room_id)

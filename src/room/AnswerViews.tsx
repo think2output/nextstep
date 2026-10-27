@@ -44,7 +44,20 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
   const pending = resolved ? null : rawPending
 
   if (!round) {
-    return <p className="pv-empty">현재 응답 요청이 없어요.<br />실습을 계속해주세요.</p>
+    // 지난 확인에 내가 어떻게 응답했는지 (사용자 피드백 2). 다른 학생의 선택·집계는 보여주지 않는다.
+    const last = store.snap?.latest_closed_round as StudentRound | null
+    const lastText = last ? ROUND_TEXT[last.type] : null
+    return (
+      <>
+        <p className="pv-empty">현재 응답 요청이 없어요.<br />실습을 계속해주세요.</p>
+        {last?.is_target && lastText && (
+          <p className="pv-status pv-hide-compact" title={lastText.question}>
+            지난 {lastText.label}:{' '}
+            {last.my_choice ? `‘${last.my_choice === 'yes' ? lastText.yes : lastText.no}’로 응답했어요` : '응답하지 않았어요'}
+          </p>
+        )}
+      </>
+    )
   }
   const text = ROUND_TEXT[round.type]
   if (!round.is_target) {
@@ -142,46 +155,26 @@ export function HostAnswer({ store }: { store: RoomStore }) {
     if (!res.ok) setMessage(errorText(res.error.code))
   }
 
-  const stats = (r: HostRound) => {
-    const t = ROUND_TEXT[r.type]
-    return (
-      <div className="pv-stats">
-        <div className="pv-stat" title={t.yes}>
-          <span className="pv-stat-label">{t.yesShort}</span>
-          <span className="pv-stat-num">{r.yes_count}</span>
-        </div>
-        <div className="pv-stat" title={t.no}>
-          <span className="pv-stat-label">{t.noShort}</span>
-          <span className="pv-stat-num">{r.no_count}</span>
-        </div>
-        <div className="pv-stat pv-stat-unanswered" title="미응답">
-          <span className="pv-stat-label">미응답</span>
-          <span className="pv-stat-num">{r.unanswered_count}</span>
-        </div>
-      </div>
-    )
-  }
-
   if (active) {
     const t = ROUND_TEXT[active.type]
     return (
       <>
-        <p className="pv-q" title={t.question}>{t.label} 진행 중</p>
-        {stats(active)}
-        <p className="pv-meta">
-          대상 {active.target_count}명
-          {active.target_connection_unknown_count > 0 && ` · 연결 미확인 ${active.target_connection_unknown_count}`}
-        </p>
-        <div className="pv-actions">
+        {/* 확인 종료 버튼을 제목 줄에 두어 240×160 안에 집계·막대·과반이 모두 들어가게 한다 */}
+        <div className="pv-q-row">
+          <p className="pv-q" title={t.question}>{t.label} 진행 중</p>
           <button
             type="button"
-            className="pv-action pv-action-grey pv-action-wide"
+            className="pv-action pv-action-grey pv-action-inline"
             disabled={!store.canWrite || busy}
             onClick={() => void run('close_round', { p_round_id: active.id })}
           >
             확인 종료
           </button>
         </div>
+        <RoundStats round={active} />
+        {active.target_connection_unknown_count > 0 && (
+          <p className="pv-meta">대상 중 연결 미확인 {active.target_connection_unknown_count}명</p>
+        )}
         {message && <p className="pv-status pv-status-warn">{message}</p>}
       </>
     )
@@ -192,7 +185,9 @@ export function HostAnswer({ store }: { store: RoomStore }) {
       {last ? (
         <>
           <p className="pv-q pv-hide-compact" title="종료된 확인">종료된 {ROUND_TEXT[last.type].label}</p>
-          <div className="pv-hide-compact">{stats(last)}</div>
+          <div className="pv-hide-compact">
+            <RoundStats round={last} />
+          </div>
         </>
       ) : (
         <p className="pv-q">보낼 확인을 고르세요</p>
@@ -213,6 +208,55 @@ export function HostAnswer({ store }: { store: RoomStore }) {
         ))}
       </div>
       {message && <p className="pv-status pv-status-warn">{message}</p>}
+    </>
+  )
+}
+
+// 강사 집계: 인원 + 대상 대비 %, 막대(50% 표시선), 과반 안내 (사용자 피드백 3).
+// 분모는 요청 시작 시 고정한 대상 인원 (RESP-02). 색만으로 구분하지 않도록 글자로도 표시.
+export function RoundStats({ round }: { round: HostRound }) {
+  const t = ROUND_TEXT[round.type]
+  const total = round.target_count
+  const pct = (n: number) => (total > 0 ? Math.round((n * 100) / total) : 0)
+  const width = (n: number) => `${total > 0 ? (n * 100) / total : 0}%`
+  const need = Math.floor(total / 2) + 1
+
+  let majority: string
+  if (round.yes_count >= need) majority = `✓ 과반이 ‘${t.yesShort}’ (${pct(round.yes_count)}%)`
+  else if (round.no_count >= need) majority = `과반이 ‘${t.noShort}’ (${pct(round.no_count)}%)`
+  else majority = `‘${t.yesShort}’ 과반까지 ${need - round.yes_count}명`
+
+  const cells = [
+    { key: 'yes', label: t.yesShort, title: t.yes, n: round.yes_count },
+    { key: 'no', label: t.noShort, title: t.no, n: round.no_count },
+    { key: 'unanswered', label: '미응답', title: '미응답', n: round.unanswered_count },
+  ]
+
+  return (
+    <>
+      <div className="pv-stats">
+        {cells.map((c) => (
+          <div key={c.key} className={`pv-stat pv-stat-${c.key}`} title={`${c.title} ${c.n}명 (${pct(c.n)}%)`}>
+            <span className="pv-stat-label">{c.label}</span>
+            <span className="pv-stat-num">
+              {c.n}
+              <span className="pv-stat-pct">{pct(c.n)}%</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      <div
+        className="pv-meter"
+        role="img"
+        aria-label={`${t.yesShort} ${pct(round.yes_count)}%, ${t.noShort} ${pct(round.no_count)}%, 미응답 ${pct(round.unanswered_count)}%`}
+      >
+        <span className="pv-meter-yes" style={{ width: width(round.yes_count) }} />
+        <span className="pv-meter-no" style={{ width: width(round.no_count) }} />
+        <i className="pv-meter-half" />
+      </div>
+      <p className="pv-majority" title={`대상 ${total}명 중 과반은 ${need}명`}>
+        {majority} · 대상 {total}명
+      </p>
     </>
   )
 }
