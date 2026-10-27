@@ -1,66 +1,75 @@
 # 진행 상태 (에이전트 인수인계)
 
-> 작업을 시작할 때 읽고, 끝날 때 갱신한다. 최신 항목을 위에 쓴다.
+> 작업을 시작할 때 읽고, 끝날 때 갱신한다. "현재 단계"와 "다음 작업"을 항상 최신으로 유지하고, 작업 기록은 날짜별로 위에 추가한다.
+> 다음 에이전트용 시작 프롬프트는 `docs/HANDOFF.md`.
 
-## 현재 단계
+## 현재 단계 (2026-10-28 기준)
 
-- 단계: **DEV03·DEV04 1차 완료 — 실제 앱 화면(시작·방·작은 창) + snapshot·Realtime·heartbeat 연결. 헤드리스 Chrome 연기 시험 7단계 통과**
-- 다음 작업: 사용자가 실제 PiP로 강사·학생 흐름 확인 → 다듬기. 이후 Vercel 배포(HTTPS), DEV07 접근성·크기 검수, 남은 GATE 항목.
-- 막힌 것: 없음
+- **로컬에서 핵심 흐름이 끝까지 동작**: 강사 방 만들기 → 학생 입장 → 작은 창(PiP) → 확인 요청·응답·집계(%·과반) → 재촉하기 → 익명 질문·🙋·답변 완료·숨김 → 방 종료.
+- 서버(Supabase): migration 6개 원격 적용, 공개 RPC 14개, private Realtime 채널, 매시 정리 작업.
+- 시험: `npm test`(DB, 35개 통과), `npm run smoke`(헤드리스 Chrome 강사 1·학생 2, 11단계 통과).
+- PRD는 **v1.4** (작은 창 크기·질문 탭·재촉하기 등 사용자 결정 반영).
+- **아직 배포 안 됨** (localhost만). 실제 PiP 창에서의 최신 화면은 사용자가 수동 확인 중.
+
+## 다음 작업 (우선순위)
+
+1. **배포 (Vercel, HTTPS)** — 제출 필수. 사용자 Vercel 로그인 필요. `vercel.json`(SPA rewrites) 준비됨. 배포 후 Supabase Auth `site_url`·redirect를 배포 주소로 갱신, README에 실제 실행한 배포 절차 기록.
+2. **Realtime 공개 채널 끄기** — Supabase 대시보드 Realtime 설정 "Allow public access" 끄기(사용자 작업). `/gate` 시험 페이지가 공개 채널을 쓰므로 끄면 /gate 두 창 시험은 동작 안 함 → /gate를 배포 빌드에서 빼거나 그대로 두고 문서에 명시.
+3. **남은 인수 테스트**: AT06(31명 정원), AT56(30명+강사 60분), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계), AT54(크기), AT55(키보드·대비), AT59(빌드에 비밀값 없음), AT60(README만으로 재현). 결과는 `docs/test-report.md`.
+4. **알려진 빈틈** (아래 표) 정리.
+5. DEV09 사용자 비교 테스트(PRD 20장), DEV10 README·발표 자료·시연 영상.
 
 ## 작업 목록 (PRD 22장)
 
-| 작업 | 상태 | 선행 | 완료 증거 | 비고 |
-|---|---|---|---|---|
-| DEV01 PiP 기술 검증 | 완료(일부 항목 남음) | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
-| DEV02 데이터 모델·권한 | 완료 | DEV01 | migration·권한 테스트 | |
-| DEV03 방 생성·참여·익명 세션 | 1차 완료 | DEV02 | 두 기기 참여 | |
-| DEV04 snapshot·Realtime·재연결 | 1차 완료 | DEV03 | 원격 상태 동기화 | |
-| DEV05 요청·응답·집계 | 대기 | DEV04 | AT15~28 | |
-| DEV06 질문·공감·완료·숨김 | 대기 | DEV04 | AT29~46 | |
-| DEV07 작은 창 통합·접근성 | 대기 | DEV05/06 | 앱 전환·크기 검수 | |
-| DEV08 만료·정리·운영 제한 | 대기 | DEV02/03 | 수명·비용·키 검수 | |
-| DEV09 사용자 비교 테스트 | 대기 | DEV07/08 | 실제 결과 표 | |
-| DEV10 문서·발표·영상 | 대기 | DEV09 | 재현·3분 발표 | |
+| 작업 | 상태 | 완료 증거 / 비고 |
+|---|---|---|
+| DEV01 PiP 기술 검증 | 대부분 완료 | `docs/gate-01.md`. 남음: G5(다른 기기 화면 공유), G6 10분, G7 새로고침 |
+| DEV02 데이터 모델·권한 | 완료 | `supabase/migrations/*`, `tests/db` |
+| DEV03 방 생성·참여·익명 세션 | 완료 | StartPage·RoomPage, smoke |
+| DEV04 snapshot·Realtime·재연결 | 1차 완료 | `src/room/useRoom.ts`. 재연결 실제 시험(AT48) 남음 |
+| DEV05 요청·응답·집계 | 완료 | AT15~28 DB 통과, %·과반·재촉 추가 |
+| DEV06 질문·공감·완료·숨김 | 완료 | AT29~41 DB 통과 |
+| DEV07 작은 창 통합·접근성 | 진행 중 | 240×160 사진 확인. 키보드·대비·125% 배율 검수 남음 |
+| DEV08 만료·정리·운영 제한 | 부분 | 정리 작업·시도 제한 구현. 24시간 경계·비용 점검 남음 |
+| DEV09 사용자 비교 테스트 | 대기 | PRD 20장 |
+| DEV10 문서·발표·영상 | 대기 | README 실행법 일부 작성 |
 
-상태 값: 대기 / 진행 중 / 완료 / 막힘 / 범위 변경
+## 알려진 빈틈
 
-## 열린 질문 (PRD 26장 + 작업 중 발견)
+| 항목 | 현재 | 메모 |
+|---|---|---|
+| 학생 답변 완료 질문 목록 | 미답변만 보임 | 강사는 필터 전환 가능 |
+| 질문 50개 초과 | '더 보기' 없음 | get_snapshot은 offset 지원 |
+| 연결 '다시 연결' | 채널만 재생성 | 30초 이상 끊김 시 표시 |
+| telemetry (P1) | 미구현 | PRD 14·20장 지표 측정용 |
+| 재촉 알림음 | 학생이 한 번 클릭한 뒤에만 재생 | 브라우저 자동 재생 정책 |
+| 비슷한 질문 찾기 | 한글↔영어 표기(깃↔git) 못 찾음 | v1 범위 밖 |
 
-| 항목 | 기본값 | 확인 대상 | 상태 |
+## 열린 질문
+
+| 항목 | 현재 처리 | 확인 대상 | 상태 |
 |---|---|---|---|
-| 1차 과제에서 Supabase·DB 사용 허용 | Supabase 제안 | 멘토 | 미확인 |
-| 실제 수강생 OS 분포 | Windows Chrome | 인터뷰 | 미확인 |
-| 최대화·F11·젭 전체 화면에서 PiP | 보장 안 함 | GATE-01 | 미확인 |
+| 과제에서 Supabase 사용 허용 | 사용으로 진행 (D-013) | 멘토 | 미확인 |
+| 실제 수강생 OS 분포 | Windows Chrome 우선 | 인터뷰 | 미확인 |
 | 강사 질문 확인 운영 담당 | 쉬는 시간·종료 전 | 인터뷰 | 미확인 |
-| 배포 공급자 | HTTPS 정적 호스팅 | 2일차 | 미정 |
-| 재촉하기(미응답자 알림) | 구현 (D-028) | 사용자 | 해결 |
-| 질문 탭 확장 시 작은 창 위치 이동 | 창 크기 고정 + 찾기·쓰기 통합 (D-015, D-016) | 사용자 | 해결 |
+| 재촉 알림음 기본값 | 켜짐(학생이 끔) | 사용자 | "소리는 괜찮을 것 같아"를 '포함'으로 해석, 재확인 요청함 |
+| 배포 공급자 | Vercel 우선 (D-011) | 사용자 | 계정 연결 대기 |
 
 ## 제출물 (과제 요건)
 
 | 항목 | 필수 | 상태 |
 |---|---|---|
-| GitHub 주소 (코드 + README 실행 방법) | 필수 | 저장소 생성됨, 내용 진행 중 |
+| GitHub 주소 (코드 + README 실행 방법) | 필수 | https://github.com/think2output/nextstep 공개. README 실행법 작성, 배포 절차 미작성 |
 | 발표 자료 (PPT/PDF) | 필수 | 미착수 |
-| 배포 주소 | 택1 이상 | 미착수 (Vercel 검토) |
+| 배포 주소 | 택1 이상 | 미착수 (Vercel) |
 | 시연 영상 1~3분 (핵심 흐름 + 방어 장면) | 택1 이상 | 미착수 |
 
 ## 작업 기록
 
 ### 2026-10-28
-- git init, GitHub 공개 저장소 think2output/nextstep 생성·push.
-- docs/prompts.md(프롬프트 모음) 추가.
-- Vite + React + TS 초기화. GATE-01 시험 페이지(`src/gate/GatePage.tsx`), PiP 훅(`src/pip/usePip.ts`) 작성. 빌드 통과.
-- GATE-01 1차 시험(로컬, Chrome 155, 1920×1080): G1·G2·G3·G4-a·G4-b 통과, G7 부분 통과. 결과는 `docs/gate-01.md`.
-- 저장소 골격 생성: CLAUDE.md, AGENTS.md, README.md, docs/*, .env.example, .gitignore, 빈 폴더.
-- 원본 PRD(`NextStep_PRD_v1.0_KO.md`)를 `docs/PRD.md`로 이동.
-- 코드·패키지 초기화는 아직 하지 않음.
-- PRD v1.1: 작은 창 크기 변경(D-012). Supabase 프로젝트 연결 확인(.env.local, 커밋 제외).
-- 두 창 실시간 시험 페이지(src/gate/useGateChannel.ts, 시험 전용 공개 Broadcast). Node 자체 시험: 두 클라이언트 간 Broadcast 전달 성공(73ms). 크기 전환은 사용자 '되는 것 같음' — 정식 확인은 보류.
-- DEV02: supabase/migrations 3개(schema, rpc, realtime_cleanup) 원격 적용. 익명 로그인 켬, 익명 로그인 제한 30→300/시간(교실 공용 IP 대비). 파일럿 코드 bcrypt 해시 저장(원문은 .env.local PILOT_CODE). tests/db 33개 통과. db advisors: 의도된 WARN만.
-- 미구현·후속: telemetry 테이블(P1), Realtime 'public access' 끄기(GATE 시험 페이지가 공개 채널 사용 중이라 보류), 30명 정원 실측(AT06·AT56), 24시간 만료 경계 시험.
-- DEV03·04: src/pages(StartPage, RoomPage), src/room(useRoom 상태 저장소, PipView, AnswerViews, QuestionView), src/styles(TDS 참고 토큰). /gate는 시험 페이지로 분리(lazy). 강사 snapshot에 join_code 추가(migration 0300). tests/e2e/smoke.mjs(헤드리스 Chrome 2프로필) 통과. 실제 PiP 창에서의 확인은 사용자 몫.
-- 알려진 미흡: 학생은 답변 완료 질문 목록을 볼 수 없음(미답변만), 질문 50개 초과 '더 보기' 없음, 연결 미확인 30초 후 '다시 연결'은 채널만 재생성.
-- 사용자 피드백 반영: 복사 실패 대비(clipboard 대체 + 링크 직접 선택), 지난 확인 기록(migration 0400 get_round_history), 학생 지난 응답 표시, 강사 % · 과반 막대, 질문 줄·🙋 정렬·배경, 웹 미리보기 확대. smoke 9단계 통과(240×160 사진 확인).
-- 재촉하기(migration 0500 nudge_round, 학생 snapshot은 미응답일 때만 nudge_count), 알림음(src/lib/chime.ts, 학생 끄기), 웹 미리보기 여백 확대. tests/db 35개, smoke 11단계 통과.
+- 저장소 골격(CLAUDE.md, AGENTS.md, docs/*), 원본 PRD를 `docs/PRD.md`로 이동, GitHub 공개 저장소 생성.
+- GATE-01: Vite+React+TS 시험 페이지(`/gate`). 1차(로컬) G1·G2·G3·G4 통과, 2차(두 창 Supabase Broadcast) 요청 31/31 수신·포커스 안 뺏김. 질문 탭 확장 시 창 위치가 밀리는 문제 발견 → 웹은 PiP 위치 지정 불가 → 크기 고정(D-015).
+- 작은 창 UI를 사용자와 반복 시험하며 확정: 240×160 / 더 작게 200×120, 질문 탭은 찾기+쓰기 한 칸, 12px·28px 줄, 🙋 많은 순, 직접 만든 스크롤 막대(기본 스크롤바 드래그 불가). PRD v1.1~v1.2.
+- DEV02: Supabase CLI 연결, 익명 로그인 켬(시간당 300), private 스키마·RPC·Realtime 정책·pg_cron 정리, 파일럿 코드 bcrypt 해시. create_room을 RPC로(PRD v1.3, D-019).
+- DEV03~06: 실제 앱 화면(TDS 참고 토큰 + Pretendard), useRoom 상태 저장소, 강사 snapshot에 참여 코드, 헤드리스 연기 시험.
+- 사용자 피드백 반영: 복사 대체 경로, 강사 %·과반 막대, 지난 확인 기록, 학생 지난 응답, 질문 줄 정렬, 웹 미리보기 확대·여백, 재촉하기(빨간 테두리 3회 점멸·알림음, 미응답자에게만). PRD v1.4.
