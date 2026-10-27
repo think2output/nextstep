@@ -71,6 +71,8 @@ export function usePip(onClosed?: () => void) {
         const win = await api.requestWindow(size)
         copyStyles(win)
         const stopSync = syncStyles(win)
+        // PiP 안에서만 쓰는 레이아웃(창 높이 꽉 채우기 등)을 위한 표시
+        win.document.documentElement.classList.add('pip-doc')
         win.document.title = '다음으로'
         win.addEventListener('pagehide', () => {
           stopSync()

@@ -323,3 +323,52 @@ button.qm-react[aria-pressed='true'] {
 .pip-tabs {
   margin-bottom: 4px;
 }
+
+/* PiP 창 안에서만: 창 높이를 꽉 채우고 내용 영역만 스크롤.
+   창 가장자리는 Chrome이 창 크기 조절로 쓰므로 스크롤바를 가장자리에서 떨어뜨린다 (사용자 보고: 스크롤바 드래그 안 됨) */
+.pip-doc,
+.pip-doc body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.pip-doc .pip {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pip-doc .pip-tabs {
+  position: static;
+  flex: none;
+}
+
+.pip-doc .pip-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* 질문 탭: 입력칸은 고정, 목록만 스크롤 */
+.pip-doc .pip-body-question {
+  overflow: hidden;
+}
+
+.pip-doc .pip-body-question .qm {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pip-doc .pip-body-question .qm-compose,
+.pip-doc .pip-body-question .qm-head {
+  flex: none;
+}
+
+.pip-doc .pip-body-question .qm-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding-right: 2px;
+}

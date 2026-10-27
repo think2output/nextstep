@@ -238,7 +238,9 @@ function GateRoom({ role }: { role: Role }) {
           </button>
         )}
       </div>
-      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <QuestionMock sort={questionSort} />}
+      <div className={`pip-body${tab === 'question' ? ' pip-body-question' : ''}`}>
+        {tab === 'answer' ? (isHost ? hostBody : studentBody) : <QuestionMock sort={questionSort} />}
+      </div>
     </div>
   )
 
