@@ -123,6 +123,30 @@ button:disabled {
   font-size: 13px;
 }
 
+.pip-buttons button[aria-pressed='true'] {
+  border-color: var(--accent);
+  border-width: 2px;
+  font-weight: 700;
+}
+
+.pip-wide {
+  width: 100%;
+}
+
+.pip-wrap {
+  white-space: normal;
+}
+
+.pip-conn {
+  margin-left: auto;
+  align-self: center;
+  font-size: 12px;
+}
+
+.pip-conn + .pip-size {
+  margin-left: 0;
+}
+
 .pip-count {
   margin: 6px 0 0;
   font-size: 12px;

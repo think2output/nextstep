@@ -1,5 +1,5 @@
 // GATE-01 PiP 기술 검증용 최소 화면 (PRD 4.3). 실제 제품 화면이 아니다.
-// 서버 통신 없음: G5·G6·G8의 기기 간 시험은 Supabase 연결 후 별도 진행.
+// ?role=host / ?role=student 로 역할을 고른다 (시험 전용, useGateChannel.ts 주석 참고).
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -10,6 +10,7 @@ import {
   type PipSize,
   usePip,
 } from '../pip/usePip'
+import { type Role, useGateChannel } from './useGateChannel'
 
 type Tab = 'answer' | 'question'
 
@@ -20,7 +21,37 @@ function now() {
   return new Date().toLocaleTimeString('ko-KR', { hour12: false })
 }
 
+function readRole(): Role | null {
+  const role = new URLSearchParams(window.location.search).get('role')
+  return role === 'host' || role === 'student' ? role : null
+}
+
 export default function GatePage() {
+  const role = readRole()
+  if (!role) return <RoleChooser />
+  return <GateRoom role={role} />
+}
+
+function RoleChooser() {
+  const base = `${window.location.origin}${window.location.pathname}`
+  return (
+    <main className="gate">
+      <h1>GATE-01 두 창 시험</h1>
+      <p className="hint">시험용 화면이에요. 강사 창과 학생 창을 따로 여세요.</p>
+      <section className="panel">
+        <p><strong>강사 창</strong> — 지금 창에서 열기</p>
+        <a href={`${base}?role=host`}>{base}?role=host</a>
+      </section>
+      <section className="panel">
+        <p><strong>학생 창</strong> — 주소를 복사해서 시크릿 창(Ctrl+Shift+N)이나 다른 컴퓨터에서 열기</p>
+        <a href={`${base}?role=student`}>{base}?role=student</a>
+      </section>
+    </main>
+  )
+}
+
+function GateRoom({ role }: { role: Role }) {
+  const isHost = role === 'host'
   const [log, setLog] = useState<string[]>([])
   const addLog = useCallback((msg: string) => {
     setLog((prev) => [`${now()}  ${msg}`, ...prev].slice(0, 300))
@@ -29,12 +60,9 @@ export default function GatePage() {
   const { status, pipWindow, error, open } = usePip(
     useCallback(() => addLog('작은 창 닫힘 감지'), [addLog]),
   )
+  const live = useGateChannel(role, addLog)
 
-  const [yes, setYes] = useState(0)
-  const [no, setNo] = useState(0)
   const [autoOn, setAutoOn] = useState(false)
-  const [requestNo, setRequestNo] = useState(0)
-  const requestCounter = useRef(0)
   const [pipSize, setPipSize] = useState('')
   const [tab, setTab] = useState<Tab>('answer')
   const [compact, setCompact] = useState(false)
@@ -73,7 +101,7 @@ export default function GatePage() {
     }
   }, [pipWindow, addLog])
 
-  // 백그라운드 타이머 지연 측정 (G6 참고값: 1초 타이머가 실제로 몇 초 간격으로 도는지)
+  // 백그라운드 타이머 지연 측정 (G6 참고값)
   const lastTick = useRef(0)
   useEffect(() => {
     lastTick.current = performance.now()
@@ -87,25 +115,17 @@ export default function GatePage() {
     return () => clearInterval(id)
   }, [addLog])
 
-  // 가짜 요청 자동 도착: VS Code에서 타이핑하면서 포커스가 유지되는지 확인용
+  // 강사: 10초마다 자동 요청 (학생이 VS Code에서 타이핑하며 포커스 유지 확인용)
+  const { sendRequest } = live
   useEffect(() => {
-    if (!autoOn) return
-    const id = setInterval(() => {
-      requestCounter.current += 1
-      setRequestNo(requestCounter.current)
-      addLog(`가짜 요청 #${requestCounter.current} 도착`)
-    }, AUTO_REQUEST_MS)
+    if (!isHost || !autoOn) return
+    const id = setInterval(() => void sendRequest(), AUTO_REQUEST_MS)
     return () => clearInterval(id)
-  }, [autoOn, addLog])
-
-  const answer = (choice: 'yes' | 'no') => {
-    if (choice === 'yes') setYes((v) => v + 1)
-    else setNo((v) => v + 1)
-    addLog(`버튼 클릭: ${choice === 'yes' ? '준비됐어요' : '잠시만요'}`)
-  }
+  }, [isHost, autoOn, sendRequest])
 
   const copyLog = async () => {
     const text = [
+      `역할: ${isHost ? '강사' : '학생'}`,
       `UA: ${navigator.userAgent}`,
       `화면: ${screen.width}×${screen.height}, 배율 ${window.devicePixelRatio}`,
       `최대 타이머 간격: ${(maxGapMs / 1000).toFixed(1)}초`,
@@ -135,11 +155,60 @@ export default function GatePage() {
     resizeTo(next ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
   }
 
+  const connLabel = live.conn === 'live' ? '● 연결됨' : live.conn === 'connecting' ? '… 연결 중' : '⚠ 재연결 중'
+  const canWrite = live.conn === 'live'
+
+  const hostBody = (
+    <>
+      <p className="pip-q">{live.request ? `#${live.request.id} 실습할 준비가 됐나요?` : '보낸 요청 없음'}</p>
+      <button type="button" className="pip-wide" disabled={!canWrite} onClick={() => void sendRequest()}>
+        {live.request ? '새 요청 보내기' : '준비 확인 보내기'}
+      </button>
+      <p className="pip-count">
+        준비 {live.yes} · 잠시만 {live.no} · 미응답 {live.unanswered} / 학생 {live.students}
+      </p>
+    </>
+  )
+
+  const studentStatus =
+    live.sendState === 'sending'
+      ? '전송 중…'
+      : live.sendState === 'unknown'
+        ? '전송을 확인하지 못했어요'
+        : live.myChoice
+          ? `✓ ${live.myChoice === 'yes' ? '준비됐어요' : '잠시만요'}로 전달했어요`
+          : '미응답'
+
+  const studentBody = live.request ? (
+    <>
+      <p className="pip-q">#{live.request.id} 실습할 준비가 됐나요?</p>
+      <div className="pip-buttons">
+        {(['yes', 'no'] as const).map((c) => (
+          <button
+            key={c}
+            type="button"
+            aria-pressed={live.myChoice === c}
+            disabled={!canWrite || live.sendState === 'sending'}
+            onClick={() => void live.answer(c)}
+          >
+            {c === 'yes' ? '준비됐어요' : '잠시만요'}
+          </button>
+        ))}
+      </div>
+      <p className="pip-count" aria-live="polite">{studentStatus}</p>
+    </>
+  ) : (
+    <p className="pip-q pip-wrap">현재 응답 요청이 없어요. 실습을 계속해주세요.</p>
+  )
+
   const pipContent = (
     <div className={`pip${compact && tab === 'answer' ? ' pip-compact' : ''}`}>
       <div className="pip-tabs">
         <button type="button" aria-pressed={tab === 'answer'} onClick={() => changeTab('answer')}>응답</button>
         <button type="button" aria-pressed={tab === 'question'} onClick={() => changeTab('question')}>질문</button>
+        <span className="pip-conn" title={connLabel} aria-label={connLabel}>
+          {live.conn === 'live' ? '●' : '⚠'}
+        </span>
         {tab === 'answer' && (
           <button
             type="button"
@@ -152,30 +221,22 @@ export default function GatePage() {
           </button>
         )}
       </div>
-      {tab === 'answer' ? (
-        <>
-          <p className="pip-q">{requestNo > 0 ? `#${requestNo} 실습할 준비가 됐나요?` : '실습할 준비가 됐나요?'}</p>
-          <div className="pip-buttons">
-            <button type="button" onClick={() => answer('yes')}>준비됐어요</button>
-            <button type="button" onClick={() => answer('no')}>잠시만요</button>
-          </div>
-          <p className="pip-count">준비됐어요 {yes} · 잠시만요 {no}</p>
-        </>
-      ) : (
-        <p className="pip-q">질문 탭 자리 (크기 시험용)</p>
-      )}
+      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <p className="pip-q">질문 탭 자리 (크기 시험용)</p>}
     </div>
   )
 
   return (
     <main className="gate">
-      <h1>GATE-01 작은 창 시험</h1>
-      <p className="hint">작은 창을 띄우고 VS Code·젭 창으로 왔다 갔다 하면서 창이 계속 보이는지 확인하세요.</p>
+      <h1>GATE-01 {isHost ? '강사' : '학생'} 창</h1>
+      <p>
+        연결: <strong>{connLabel}</strong>
+        {isHost && <> · 연결된 학생 <strong>{live.students}</strong>명</>}
+      </p>
 
       <section className="panel">
         <p>
-          지원 여부: <strong>{status === 'unsupported' ? '지원 안 됨 (Chrome 116 이상 필요)' : '지원됨'}</strong>
-          {' · '}상태: <strong>{status}</strong>
+          작은 창: <strong>{status === 'unsupported' ? '지원 안 됨 (Chrome 116 이상 필요)' : status}</strong>
+          {status === 'open' && <> · 실제 크기 <strong>{pipSize}</strong></>}
         </p>
         {error && <p className="error">열기 실패: {error}</p>}
         <button
@@ -184,27 +245,27 @@ export default function GatePage() {
           onClick={() => {
             setTab('answer')
             setCompact(false)
-            open(PIP_SIZE_DEFAULT)
+            void open(PIP_SIZE_DEFAULT)
           }}
         >
           작은 창 띄우기
         </button>
-        {status === 'open' && <p>작은 창 실제 크기: <strong>{pipSize}</strong></p>}
         {status === 'open' && <p className="hint">작은 창을 사용하는 동안 이 탭은 닫지 마세요.</p>}
       </section>
 
-      <section className="panel">
-        <label className="row">
-          <input type="checkbox" checked={autoOn} onChange={(e) => setAutoOn(e.target.checked)} />
-          10초마다 가짜 요청 보내기 (VS Code에서 타이핑하며 포커스가 안 뺏기는지 확인)
-        </label>
-        <p>최대 타이머 간격: {(maxGapMs / 1000).toFixed(1)}초 (탭을 뒤에 둘 때 늘어나는지 확인)</p>
-      </section>
+      {isHost && (
+        <section className="panel">
+          <label className="row">
+            <input type="checkbox" checked={autoOn} onChange={(e) => setAutoOn(e.target.checked)} />
+            10초마다 자동으로 새 요청 보내기
+          </label>
+        </section>
+      )}
 
       {/* 작은 창이 열려 있으면 원래 탭에는 버튼을 숨긴다 (PIP-02: 쓰기 UI 중복 금지) */}
       {status !== 'open' && (
         <section className="panel">
-          <p className="hint">작은 창이 없을 때 보이는 일반 화면입니다. ‘항상 위’ 기능이 아닙니다.</p>
+          <p className="hint">작은 창이 없을 때 보이는 일반 화면이에요. ‘항상 위’ 기능이 아니에요.</p>
           {pipContent}
         </section>
       )}
@@ -215,6 +276,7 @@ export default function GatePage() {
           <button type="button" onClick={copyLog}>기록 복사</button>
           <button type="button" onClick={() => setLog([])}>지우기</button>
         </div>
+        <p className="hint">최대 타이머 간격: {(maxGapMs / 1000).toFixed(1)}초</p>
         <pre className="log">{log.join('\n') || '아직 기록 없음'}</pre>
       </section>
 
