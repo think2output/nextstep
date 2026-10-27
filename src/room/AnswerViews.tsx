@@ -112,6 +112,8 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
     status = <p className="pv-status pv-status-warn" aria-live="polite">{message}</p>
   } else if (myChoice) {
     status = <p className="pv-status pv-status-ok" aria-live="polite">✓ ‘{label(myChoice)}’로 전달했어요</p>
+  } else if ((round.nudge_count ?? 0) > 0) {
+    status = <p className="pv-status pv-status-alert" role="alert">강사님이 응답을 기다리고 있어요</p>
   } else {
     status = <p className="pv-status pv-status-idle" aria-live="polite">미응답</p>
   }
@@ -162,6 +164,16 @@ export function HostAnswer({ store }: { store: RoomStore }) {
         {/* 확인 종료 버튼을 제목 줄에 두어 240×160 안에 집계·막대·과반이 모두 들어가게 한다 */}
         <div className="pv-q-row">
           <p className="pv-q" title={t.question}>{t.label} 진행 중</p>
+          <button
+            type="button"
+            className="pv-action pv-action-inline pv-action-nudge"
+            aria-label={`미응답 ${active.unanswered_count}명에게 재촉하기${active.nudge_count ? `, 지금까지 ${active.nudge_count}번` : ''}`}
+            title={`미응답 ${active.unanswered_count}명에게 재촉하기${active.nudge_count ? ` (보낸 횟수 ${active.nudge_count})` : ''}`}
+            disabled={!store.canWrite || busy || active.unanswered_count === 0}
+            onClick={() => void run('nudge_round', { p_round_id: active.id })}
+          >
+            🔔{active.nudge_count ? <span className="pv-nudge-count">{active.nudge_count}</span> : null}
+          </button>
           <button
             type="button"
             className="pv-action pv-action-grey pv-action-inline"

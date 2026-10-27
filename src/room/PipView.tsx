@@ -3,6 +3,7 @@ import { type MouseEvent, useState } from 'react'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, resizePip } from '../pip/usePip'
 import { HostAnswer, StudentAnswer } from './AnswerViews'
 import QuestionView from './QuestionView'
+import type { NudgeState } from './useNudge'
 import type { RoomStore } from './useRoom'
 
 export type PipTab = 'answer' | 'question'
@@ -15,9 +16,10 @@ type Props = {
   setCompact: (compact: boolean) => void
   draft: string
   setDraft: (value: string) => void
+  nudge: NudgeState
 }
 
-export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft }: Props) {
+export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft, nudge }: Props) {
   const snap = store.snap!
   const isHost = snap.my_role === 'host'
   const activeId = snap.active_round?.id ?? null
@@ -46,10 +48,16 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
 
   return (
     <div className={`pv${compact ? ' pv-compact' : ''}`}>
+      {/* 재촉: 빨간 테두리 3번 깜빡인 뒤 응답할 때까지 유지 (D-028). 횟수가 바뀌면 key로 애니메이션 재시작 */}
+      {nudge.active && <div key={nudge.key} className="pv-nudge" aria-hidden="true" />}
       <div className="pv-bar">
         <button type="button" className="pv-tab" aria-pressed={tab === 'answer'} onClick={() => setTab('answer')}>
           응답
-          {newRequest && <span className="pv-badge" role="status" aria-label="새 응답 요청" />}
+          {nudge.active && tab === 'question' ? (
+            <span className="pv-badge pv-badge-alert" role="status" aria-label="강사님이 응답을 기다려요" />
+          ) : (
+            newRequest && <span className="pv-badge" role="status" aria-label="새 응답 요청" />
+          )}
         </button>
         <button type="button" className="pv-tab" aria-pressed={tab === 'question'} onClick={() => setTab('question')}>
           질문 {snap.pending_question_count}

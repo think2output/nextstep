@@ -71,6 +71,8 @@ export type HostRound = {
   no_count: number
   unanswered_count: number
   target_connection_unknown_count: number
+  nudge_count?: number
+  last_nudged_at?: string | null
 }
 
 export type StudentRound = {
@@ -82,6 +84,7 @@ export type StudentRound = {
   is_target: boolean
   my_choice: Choice | null
   my_response_version: number
+  nudge_count?: number // 내가 대상이면서 미응답일 때만 0보다 큼
 }
 
 export type QuestionCard = {

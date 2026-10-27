@@ -22,21 +22,12 @@ async function profile(name) {
   return page
 }
 
-// 원래 탭의 미리보기 틀을 작은 창 크기(240×160)·작은 창 글자 크기로 찍는다. 화면 상태는 바꾸지 않는다.
+// 원래 탭의 미리보기 틀을 잠시 작은 창 모양(240×160, 작은 창 글자·여백)으로 바꿔 찍고 되돌린다.
 async function pipShot(page, path) {
-  const frame = page.locator('.pip-frame')
-  const style = await page.addStyleTag({ content: `
-    .pip-frame { --pip-pad: 8px; --pip-tab-h: 30px; --pip-btn-h: 44px; --pip-icon: 30px; --pip-row-h: 28px;
-      --pip-fs-q: 13px; --pip-fs-list: 12px; --pip-fs-meta: 11px; width: 240px !important; border-radius: 0 }
-    .pip-frame .pv { height: 160px !important }
-    .pip-frame .pv-tab, .pip-frame .pv-icon { font-size: 13px }
-    .pip-frame .pv-action { min-height: 32px; font-size: 12px }
-    .pip-frame .pv-stat-num { font-size: 15px }
-    .pip-frame .pv-meter { height: 6px }
-    .pip-frame .qv-input, .pip-frame .qv-send { height: 32px }
-    .pip-frame .qv-send { width: 32px }
-    .pip-frame .qv-line { line-height: 18px; padding: 5px 2px }` })
-  await frame.screenshot({ path })
+  const style = await page.addStyleTag({ content: '.pip-shot { width: 240px; border: 1px solid #e5e8eb } .pip-shot .pv { height: 160px }' })
+  await page.locator('.pip-frame').evaluate((el) => el.classList.replace('pip-frame', 'pip-shot'))
+  await page.locator('.pip-shot').screenshot({ path })
+  await page.locator('.pip-shot').evaluate((el) => el.classList.replace('pip-shot', 'pip-frame'))
   await style.evaluate((el) => el.remove())
 }
 
@@ -100,6 +91,23 @@ try {
   await student2.getByRole('button', { name: '저도 궁금해요 1' }).waitFor({ timeout: 5_000 })
   step('다른 학생 🙋 공감 +1')
   await pipShot(student2, 'tests/e2e/pip-student-question.png')
+
+  // 재촉: 강사가 이해 확인을 보내고 미응답자에게 재촉 → 학생 빨간 테두리·안내
+  await host.getByRole('button', { name: '이해 확인' }).click()
+  await host.getByText('이해 확인 진행 중').waitFor()
+  await host.getByRole('button', { name: /^미응답 2명에게 재촉하기/ }).click()
+  await student.getByRole('button', { name: /^응답/ }).locator('.pv-badge-alert').waitFor({ timeout: 5_000 })
+  await student.getByRole('button', { name: /^응답/ }).click()
+  await student.getByText('강사님이 응답을 기다리고 있어요').waitFor()
+  await student.locator('.pv-nudge').waitFor()
+  step('재촉: 학생 응답 탭 빨간 점 → 빨간 테두리·안내')
+  await pipShot(student, 'tests/e2e/pip-student-nudge.png')
+  await pipShot(host, 'tests/e2e/pip-host-nudge.png')
+  await student.getByRole('button', { name: '이해했어요' }).click()
+  await student.getByText('‘이해했어요’로 전달했어요').waitFor()
+  await student.locator('.pv-nudge').waitFor({ state: 'detached', timeout: 3_000 })
+  step('응답하면 재촉 표시 사라짐')
+  await host.screenshot({ path: 'tests/e2e/host-web.png', fullPage: true })
 
   // 강사: 질문 보이고 답변 완료
   await host.getByRole('button', { name: /^질문/ }).click()

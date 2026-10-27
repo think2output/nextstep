@@ -980,3 +980,207 @@ button:disabled {
   min-height: 40px;
   padding: 0 16px;
 }
+
+/* ═════════ 재촉 (D-028) ═════════ */
+.pv {
+  position: relative;
+}
+
+/* 빨간 테두리: 0.4초 간격으로 3번 깜빡인 뒤 유지 (초당 3회 미만 점멸) */
+.pv-nudge {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 3px solid var(--red-500);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: nudge-blink 0.8s ease-in-out 3;
+}
+
+@keyframes nudge-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-nudge {
+    animation: none;
+  }
+}
+
+.pv-status-alert {
+  color: var(--red-500);
+  font-weight: 700;
+}
+
+.pv-badge-alert {
+  background: var(--red-500);
+}
+
+.pv-action-nudge {
+  position: relative;
+  min-width: 34px;
+  padding: 0 6px;
+  background: var(--red-50);
+  color: var(--red-500);
+}
+
+.pv-nudge-count {
+  margin-left: 2px;
+  font-size: var(--pip-fs-meta);
+  font-weight: 700;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.switch-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--blue-500);
+}
+
+/* ═════════ 웹 화면 미리보기 여백 (사용자 피드백: 너무 붙어 있음) ═════════ */
+.pip-frame .pv {
+  height: auto;
+  min-height: 380px;
+  padding: 8px 24px 24px;
+  gap: 4px;
+}
+
+.pip-frame .pv-bar {
+  padding: 14px 0 14px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--grey-100);
+  gap: 6px;
+}
+
+.pip-frame .pv-tab {
+  padding: 0 14px;
+}
+
+.pip-frame .pv-q,
+.pip-frame .pv-q-row .pv-q {
+  margin: 6px 2px 16px;
+  font-size: 18px;
+}
+
+.pip-frame .pv-q-row {
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.pip-frame .pv-q-row .pv-q {
+  margin: 6px 2px;
+}
+
+.pip-frame .pv-stats {
+  gap: 10px;
+}
+
+.pip-frame .pv-stat {
+  padding: 14px 6px;
+  border-radius: var(--radius-m);
+}
+
+.pip-frame .pv-stat-label {
+  margin-bottom: 4px;
+}
+
+.pip-frame .pv-meter {
+  margin: 18px 1px 0;
+}
+
+.pip-frame .pv-majority {
+  margin: 10px 2px 22px;
+}
+
+.pip-frame .pv-meta {
+  margin: 4px 2px 12px;
+}
+
+.pip-frame .pv-actions {
+  gap: 10px;
+}
+
+.pip-frame .pv-choices {
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.pip-frame .pv-status {
+  margin-top: 14px;
+}
+
+.pip-frame .pv-empty {
+  margin: 48px 4px;
+}
+
+.pip-frame .qv-compose {
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pip-frame .qv-head {
+  margin: 4px 2px 8px;
+}
+
+.pip-frame .qv-item {
+  padding: 6px 0;
+  gap: 8px;
+}
+
+.pip-frame .qv-react,
+.pip-frame .qv-mini {
+  min-width: 52px;
+  border-radius: var(--radius-s);
+}
+
+.pip-frame .qv-seg button {
+  height: 32px;
+  padding: 0 14px;
+}
+
+.pip-frame .qv-scroll {
+  min-height: 240px;
+}
+
+.pip-frame .pv-nudge {
+  border-width: 4px;
+}
+
+.history-item {
+  padding: 16px 18px 6px;
+}
+
+.history-head {
+  margin-bottom: 10px;
+}
+
+.history-item .pv-stats {
+  gap: 8px;
+}
+
+.history-item .pv-stat {
+  padding: 8px 4px;
+}
+
+.history-item .pv-meter {
+  margin-top: 12px;
+}
+
+.history-item .pv-majority {
+  margin: 8px 2px 10px;
+}

@@ -112,6 +112,27 @@ describe('집계', () => {
     expect(denied.error?.code).toBe('FORBIDDEN')
   })
 
+  it('재촉하기: 미응답 학생에게만 보이고, 학생은 재촉 불가, 닫힌 회차는 거절', async () => {
+    const { host, room, students } = await setupRoom(2)
+    const [answered, waiting] = students
+    const roundId = await startRound(host, room.room_id)
+    await rpc(answered, 'set_response', { p_round_id: roundId, p_choice: 'yes', p_expected_version: 0, p_action_id: aid() })
+
+    const nudged = await rpc(host, 'nudge_round', { p_round_id: roundId, p_action_id: aid() })
+    expect(nudged.data).toMatchObject({ nudge_count: 1, unanswered_count: 1 })
+    await sleep(400)
+    expect((await rpc(host, 'nudge_round', { p_round_id: roundId, p_action_id: aid() })).data?.nudge_count).toBe(2)
+
+    expect((await snapshot(waiting, room.room_id)).active_round.nudge_count).toBe(2)
+    expect((await snapshot(answered, room.room_id)).active_round.nudge_count).toBe(0)
+    expect((await snapshot(host, room.room_id)).active_round.nudge_count).toBe(2)
+
+    expect((await rpc(waiting, 'nudge_round', { p_round_id: roundId, p_action_id: aid() })).error?.code).toBe('FORBIDDEN')
+    await rpc(host, 'close_round', { p_round_id: roundId, p_action_id: aid() })
+    await sleep(400)
+    expect((await rpc(host, 'nudge_round', { p_round_id: roundId, p_action_id: aid() })).error?.code).toBe('ROUND_CLOSED')
+  })
+
   it('AT21 요청 후 입장한 학생은 대상 아님', async () => {
     const { host, room } = await setupRoom(1)
     const roundId = await startRound(host, room.room_id)

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { navigate } from '../app/router'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, usePip } from '../pip/usePip'
 import PipView, { type PipTab } from '../room/PipView'
+import { useNudge } from '../room/useNudge'
 import { useRoom } from '../room/useRoom'
 import { copyText } from '../lib/clipboard'
 import { call } from '../lib/rpc'
@@ -12,6 +13,16 @@ import { ROUND_TEXT, errorText, type HostRound } from '../shared/domain'
 
 function draftKey(roomId: string) {
   return `nextstep:draft:${roomId}`
+}
+
+const SOUND_KEY = 'nextstep:nudge-sound'
+
+function readSound() {
+  try {
+    return localStorage.getItem(SOUND_KEY) !== 'off'
+  } catch {
+    return true
+  }
 }
 
 function readDraft(roomId: string) {
@@ -30,6 +41,16 @@ export default function RoomPage({ roomId }: { roomId: string }) {
   const [compact, setCompact] = useState(false)
   const [ending, setEnding] = useState(false)
   const [endError, setEndError] = useState<string | null>(null)
+  const [soundOn, setSoundOn] = useState(readSound)
+  const nudge = useNudge(store, soundOn)
+  const toggleSound = (on: boolean) => {
+    setSoundOn(on)
+    try {
+      localStorage.setItem(SOUND_KEY, on ? 'on' : 'off')
+    } catch {
+      // 이 브라우저에서만 기억 못 할 뿐
+    }
+  }
 
   // 작성 중 질문은 같은 탭 새로고침에서 복원. 서버로 보내지 않는다 (PIP-03)
   const [draft, setDraftState] = useState(() => readDraft(roomId))
@@ -78,6 +99,7 @@ export default function RoomPage({ roomId }: { roomId: string }) {
       compact={compact}
       setCompact={setCompact}
       draft={draft}
+      nudge={nudge}
       setDraft={setDraft}
     />
   )
@@ -123,6 +145,15 @@ export default function RoomPage({ roomId }: { roomId: string }) {
           </button>
         )}
         {pip.status !== 'open' && <div className="pip-frame">{view}</div>}
+        {!isHost && (
+          <label className="switch-row">
+            <input type="checkbox" checked={soundOn} onChange={(e) => toggleSound(e.target.checked)} />
+            <span>
+              재촉 알림음
+              <span className="muted"> · 강사님이 응답을 기다릴 때 짧은 소리로 알려요</span>
+            </span>
+          </label>
+        )}
       </section>
 
       {isHost && <RoundHistory roomId={roomId} lastClosedId={snap.latest_closed_round?.id ?? null} />}
