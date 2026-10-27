@@ -293,3 +293,33 @@ button.qm-react[aria-pressed='true'] {
 .pip-icon + .pip-conn {
   margin-left: 0;
 }
+
+/* 질문 목록 밀도 조정 (사용자 요청: 질문 글씨 12px). 줄 높이는 🙋 버튼이 정하므로 28px로 함께 낮춘다 */
+.qm-item {
+  padding: 0;
+  gap: 2px;
+}
+
+.qm-line {
+  min-height: 28px;
+  padding: 5px 2px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.qm-line.qm-open {
+  padding: 5px 2px;
+}
+
+.qm-react {
+  min-height: 28px;
+  margin: 0;
+}
+
+.qm-input {
+  font-size: 12px;
+}
+
+.pip-tabs {
+  margin-bottom: 4px;
+}
