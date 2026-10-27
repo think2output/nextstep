@@ -4,16 +4,16 @@
 
 ## 현재 단계
 
-- 단계: **DEV01 사실상 완료 — PiP·두 창 실시간 통과, 작은 창 UI(응답·질문) 방향 확정(PRD v1.2). 남은 GATE 항목: G5(다른 기기), G6 10분, G7 새로고침**
-- 다음 작업: DEV02 데이터 모델·권한 (supabase/migrations, PRD 14·15장). 남은 GATE 항목은 기회 될 때 병행.
+- 단계: **DEV02 완료 — DB 스키마·RPC 12개·Realtime 권한·정리 작업 원격 적용, DB 자동 테스트 33개 통과**
+- 다음 작업: DEV03 방 생성·참여 화면 + DEV04 snapshot·Realtime·재연결 클라이언트 (src/ 실제 앱). 남은 GATE 항목(G5·G6 10분·G7)은 병행.
 - 막힌 것: 없음
 
 ## 작업 목록 (PRD 22장)
 
 | 작업 | 상태 | 선행 | 완료 증거 | 비고 |
 |---|---|---|---|---|
-| DEV01 PiP 기술 검증 | 진행 중 | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
-| DEV02 데이터 모델·권한 | 대기 | DEV01 | migration·권한 테스트 | |
+| DEV01 PiP 기술 검증 | 완료(일부 항목 남음) | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
+| DEV02 데이터 모델·권한 | 완료 | DEV01 | migration·권한 테스트 | |
 | DEV03 방 생성·참여·익명 세션 | 대기 | DEV02 | 두 기기 참여 | |
 | DEV04 snapshot·Realtime·재연결 | 대기 | DEV03 | 원격 상태 동기화 | |
 | DEV05 요청·응답·집계 | 대기 | DEV04 | AT15~28 | |
@@ -57,3 +57,5 @@
 - 코드·패키지 초기화는 아직 하지 않음.
 - PRD v1.1: 작은 창 크기 변경(D-012). Supabase 프로젝트 연결 확인(.env.local, 커밋 제외).
 - 두 창 실시간 시험 페이지(src/gate/useGateChannel.ts, 시험 전용 공개 Broadcast). Node 자체 시험: 두 클라이언트 간 Broadcast 전달 성공(73ms). 크기 전환은 사용자 '되는 것 같음' — 정식 확인은 보류.
+- DEV02: supabase/migrations 3개(schema, rpc, realtime_cleanup) 원격 적용. 익명 로그인 켬, 익명 로그인 제한 30→300/시간(교실 공용 IP 대비). 파일럿 코드 bcrypt 해시 저장(원문은 .env.local PILOT_CODE). tests/db 33개 통과. db advisors: 의도된 WARN만.
+- 미구현·후속: telemetry 테이블(P1), Realtime 'public access' 끄기(GATE 시험 페이지가 공개 채널 사용 중이라 보류), 30명 정원 실측(AT06·AT56), 24시간 만료 경계 시험.

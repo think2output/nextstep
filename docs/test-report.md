@@ -1,4 +1,4 @@
-# 인수 테스트 결과 (PRD 21)
+부분 | DB 자동 room.test.ts: 종료 직후 읽기 가능·쓰기 거절. 24시간 경계는 미시험 |통과 | DB 자동 room.test.ts |통과 | DB 자동 security.test.ts (private·public 직접 조회 차단) |통과 | DB 자동 security.test.ts |부분 | DB 자동 security.test.ts: RPC·Realtime 비멤버 차단. 다른 방 ID로 쓰기 RPC는 미시험 |부분 | DB 자동 security.test.ts: snapshot·Broadcast에 인증 ID·작성자·개별 응답 없음. 브라우저 Network 탭 확인은 UI 구현 후 |통과 | DB 자동 question.test.ts (강사·학생 모든 필터 snapshot) |통과 | DB 자동 question.test.ts |통과 | DB 자동 question.test.ts |통과 | DB 자동 question.test.ts |통과 | DB 자동 question.test.ts |부분 | DB 자동 서버 거절 확인(question.test.ts). UI 차단은 UI 구현 후 |통과 | DB 자동 question.test.ts |통과 | DB 자동 question.test.ts (동시 2회) |부분 | DB 자동 question.test.ts: 문자열 그대로 저장만 확인. 화면 렌더링·가로 넘침은 UI 구현 후 |통과 | DB 자동 question.test.ts (이모지 200/201 code point) |통과 | DB 자동 question.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts |통과 | DB 자동 round.test.ts (같은 강사 동시 2요청) |통과 | DB 자동 round.test.ts (거절 시 회차 미생성) |통과 | DB 자동 round.test.ts |통과 | DB 자동 room.test.ts (target_count=1) |통과 | DB 자동 room.test.ts (공백·하이픈·소문자 정규화 포함) |통과 | DB 자동 room.test.ts (동시 2회) |통과 | DB 자동 room.test.ts (앞뒤 공백 제외 30자) |통과 | DB 자동 room.test.ts |# 인수 테스트 결과 (PRD 21)
 
 기록 규칙: 준비 조건·실행·기대 결과·실제 결과·증거·환경 버전을 남긴다. 기대값을 통과해야 기능 완료로 표시한다.
 실행하지 않은 테스트는 "미실행"으로 둔다. 결과를 추측해 채우지 않는다.
@@ -10,21 +10,21 @@
 
 | 항목 | 값 |
 |---|---|
-| 빌드 커밋 | |
+| 빌드 커밋 | DB 자동 테스트: DEV02 커밋 (2026-10-28) |
 | OS / Chrome | |
-| 배포 URL | |
+| 배포 URL | 미배포. DB = Supabase 프로젝트 rumytuhqrrpdvtojokpz (Tokyo) |
 
 ## 결과
 
 | ID | 시험 | 기대 결과 | 결과 | 증거·메모 |
 |---|---|---|---|---|
-| AT01 | 수업명 공백 입력 | 생성 불가 | 미실행 | |
-| AT02 | 수업명 30자·31자 | 30 허용, 31 거절 | 미실행 | |
-| AT03 | 생성 버튼 중복 전송 | 같은 action으로 방 1개 | 미실행 | |
-| AT04 | 유효·오류 참여 코드 | 정상 입장 / 내용 노출 없는 오류 | 미실행 | |
-| AT05 | 동일 세션 두 탭 참여 | 멤버 1명 | 미실행 | |
+| AT01 | 수업명 공백 입력 | 생성 불가 | 통과 | DB 자동 room.test.ts |
+| AT02 | 수업명 30자·31자 | 30 허용, 31 거절 | 통과 | DB 자동 room.test.ts (앞뒤 공백 제외 30자) |
+| AT03 | 생성 버튼 중복 전송 | 같은 action으로 방 1개 | 통과 | DB 자동 room.test.ts (동시 2회) |
+| AT04 | 유효·오류 참여 코드 | 정상 입장 / 내용 노출 없는 오류 | 통과 | DB 자동 room.test.ts (공백·하이픈·소문자 정규화 포함) |
+| AT05 | 동일 세션 두 탭 참여 | 멤버 1명 | 통과 | DB 자동 room.test.ts (target_count=1) |
 | AT06 | 서로 다른 세션 31명 입장 | 30명까지, 31번째 거절 | 미실행 | |
-| AT07 | 강사 권한으로 학생 응답 | 거절 | 미실행 | |
+| AT07 | 강사 권한으로 학생 응답 | 거절 | 통과 | DB 자동 round.test.ts |
 | AT08 | API 없는 브라우저 | 지원 안내 | 미실행 | |
 | AT09 | PiP 사용자 클릭으로 열기 | 별도 작은 창 | 미실행 | |
 | AT10 | 젭·VS Code·Chrome 각 10회 전환 | 창 유지 | 미실행 | |
@@ -32,43 +32,43 @@
 | AT12 | 질문 작성 중 요청 도착 | 초안 유지, 배지, 자동 전환 없음 | 미실행 | |
 | AT13 | PiP 닫기 | 방 유지, 재열기 | 미실행 | |
 | AT14 | 원래 탭 새로고침 | 서버 상태·초안 복구, 수동 재열기 | 미실행 | |
-| AT15 | 연결된 학생 0명 요청 | 생성 거절 | 미실행 | |
-| AT16 | 두 강사 탭 동시 요청 | 활성 요청 1개 | 미실행 | |
-| AT17 | 5명 대상, yes 2/no 1 | 미응답 2, 합계 5 | 미실행 | |
-| AT18 | no → yes 변경 | yes+1/no-1, 총응답 고정 | 미실행 | |
-| AT19 | 같은 선택 재클릭 | 집계 변화 없음 | 미실행 | |
-| AT20 | 새 회차 | 이월 없음 | 미실행 | |
-| AT21 | 요청 후 새 학생 입장 | 대상 제외 안내 | 미실행 | |
+| AT15 | 연결된 학생 0명 요청 | 생성 거절 | 통과 | DB 자동 round.test.ts (거절 시 회차 미생성) |
+| AT16 | 두 강사 탭 동시 요청 | 활성 요청 1개 | 통과 | DB 자동 round.test.ts (같은 강사 동시 2요청) |
+| AT17 | 5명 대상, yes 2/no 1 | 미응답 2, 합계 5 | 통과 | DB 자동 round.test.ts |
+| AT18 | no → yes 변경 | yes+1/no-1, 총응답 고정 | 통과 | DB 자동 round.test.ts |
+| AT19 | 같은 선택 재클릭 | 집계 변화 없음 | 통과 | DB 자동 round.test.ts |
+| AT20 | 새 회차 | 이월 없음 | 통과 | DB 자동 round.test.ts |
+| AT21 | 요청 후 새 학생 입장 | 대상 제외 안내 | 통과 | DB 자동 round.test.ts |
 | AT22 | 대상자 연결 끊김 | 분모 유지, 연결 미확인 | 미실행 | |
 | AT23 | 종료와 응답 경합 | 순서 일관, 종료 후 거절 | 미실행 | |
-| AT24 | 오래된 회차 ID 전송 | 새 회차 반영 안 됨 | 미실행 | |
+| AT24 | 오래된 회차 ID 전송 | 새 회차 반영 안 됨 | 통과 | DB 자동 round.test.ts |
 | AT25 | 승인 지연 8초 | 결과 미확인 | 미실행 | |
-| AT26 | 성공 유실 후 같은 action 재시도 | 중복 없음 | 미실행 | |
-| AT27 | 같은 action 다른 payload | ACTION_ID_REUSED | 미실행 | |
-| AT28 | stale version | VERSION_CONFLICT | 미실행 | |
-| AT29 | 빈·공백·200·201자 질문 | 앞둘 거절, 200 허용, 201 거절 | 미실행 | |
-| AT30 | 한글·개행·이모지 길이 | 서버·클라 동일 | 미실행 | |
-| AT31 | script 태그·긴 URL | 실행 없음, 넘침 없음 | 미실행 | |
+| AT26 | 성공 유실 후 같은 action 재시도 | 중복 없음 | 통과 | DB 자동 round.test.ts |
+| AT27 | 같은 action 다른 payload | ACTION_ID_REUSED | 통과 | DB 자동 round.test.ts |
+| AT28 | stale version | VERSION_CONFLICT | 통과 | DB 자동 round.test.ts |
+| AT29 | 빈·공백·200·201자 질문 | 앞둘 거절, 200 허용, 201 거절 | 통과 | DB 자동 question.test.ts |
+| AT30 | 한글·개행·이모지 길이 | 서버·클라 동일 | 통과 | DB 자동 question.test.ts (이모지 200/201 code point) |
+| AT31 | script 태그·긴 URL | 실행 없음, 넘침 없음 | 부분 | DB 자동 question.test.ts: 문자열 그대로 저장만 확인. 화면 렌더링·가로 넘침은 UI 구현 후 |
 | AT32 | 질문 전송 실패 | 입력 유지 | 미실행 | |
-| AT33 | 질문 등록 재시도 | 질문 1개 | 미실행 | |
-| AT34 | 10초 내 재작성 | 제한 안내 | 미실행 | |
+| AT33 | 질문 등록 재시도 | 질문 1개 | 통과 | DB 자동 question.test.ts (동시 2회) |
+| AT34 | 10초 내 재작성 | 제한 안내 | 통과 | DB 자동 question.test.ts |
 | AT35 | 학생 21번째·방 301번째 | 한도 거절 | 미실행 | |
-| AT36 | 내 질문 공감 | UI 차단·서버 거절 | 미실행 | |
-| AT37 | 타인 공감 선택·취소 | +1/-1 | 미실행 | |
-| AT38 | 공감 중복 전송 | 중복 증가 없음 | 미실행 | |
-| AT39 | 완료 질문 공감 | 거절 | 미실행 | |
-| AT40 | 답변 완료·복구 | 필터·수 정합 | 미실행 | |
-| AT41 | 질문 숨김 | 모든 화면 본문 제거 | 미실행 | |
+| AT36 | 내 질문 공감 | UI 차단·서버 거절 | 부분 | DB 자동 서버 거절 확인(question.test.ts). UI 차단은 UI 구현 후 |
+| AT37 | 타인 공감 선택·취소 | +1/-1 | 통과 | DB 자동 question.test.ts |
+| AT38 | 공감 중복 전송 | 중복 증가 없음 | 통과 | DB 자동 question.test.ts |
+| AT39 | 완료 질문 공감 | 거절 | 통과 | DB 자동 question.test.ts |
+| AT40 | 답변 완료·복구 | 필터·수 정합 | 통과 | DB 자동 question.test.ts |
+| AT41 | 질문 숨김 | 모든 화면 본문 제거 | 통과 | DB 자동 question.test.ts (강사·학생 모든 필터 snapshot) |
 | AT42 | 실시간 질문 추가 | 초안·스크롤·정렬 유지 | 미실행 | |
-| AT43 | Network 확인 | 타인 author_id·개별 응답 없음 | 미실행 | |
-| AT44 | 다른 방 RPC·구독 | 차단 | 미실행 | |
-| AT45 | 학생이 host API 호출 | 거절 | 미실행 | |
-| AT46 | 원본 테이블 직접 조회 | 차단 | 미실행 | |
+| AT43 | Network 확인 | 타인 author_id·개별 응답 없음 | 부분 | DB 자동 security.test.ts: snapshot·Broadcast에 인증 ID·작성자·개별 응답 없음. 브라우저 Network 탭 확인은 UI 구현 후 |
+| AT44 | 다른 방 RPC·구독 | 차단 | 부분 | DB 자동 security.test.ts: snapshot RPC·Realtime 비멤버 차단. 다른 방 ID로 쓰기 RPC는 미시험 |
+| AT45 | 학생이 host API 호출 | 거절 | 통과 | DB 자동 security.test.ts |
+| AT46 | 원본 테이블 직접 조회 | 차단 | 통과 | DB 자동 security.test.ts (private·public 직접 조회 차단) |
 | AT47 | Realtime 중복·역순·누락 | 최신 revision 수렴 | 미실행 | |
 | AT48 | 인터넷 끊기·재연결 | 쓰기 잠금, 복구 | 미실행 | |
 | AT49 | 방 종료 중 질문 | 원자적 성공 또는 거절 | 미실행 | |
-| AT50 | 종료 방 신규 입장 | 거절 | 미실행 | |
-| AT51 | 종료 방 기존 멤버 | 24시간 읽기만 | 미실행 | |
+| AT50 | 종료 방 신규 입장 | 거절 | 통과 | DB 자동 room.test.ts |
+| AT51 | 종료 방 기존 멤버 | 24시간 읽기만 | 부분 | DB 자동 room.test.ts: 종료 직후 읽기 가능·쓰기 거절. 24시간 경계는 미시험 |
 | AT52 | 종료 24시간 경과 | 읽기 차단 | 미실행 | |
 | AT53 | 정리 작업 | 하위 데이터 삭제 | 미실행 | |
 | AT54 | 기본·확장·최소 창 크기 | 넘침·잘림 없음 | 미실행 | |

@@ -150,3 +150,10 @@
   > 훨씬 나아졌어.
 - 결과 요약: 질문 탭 방식을 PRD v1.2(8.2·8.3·8.6)와 결정 D-015~018로 확정. 다음 단계 DEV02.
 - 관련 ai-log: —
+
+### P-019 | 2026-10-28 | 구현 | DEV02, PRD 13~15, 17
+- 목적: Supabase CLI 로그인 완료 후 DB·권한 구현
+- 프롬프트:
+  > Supabase에 로그인했어.
+- 결과 요약: supabase init/link, 익명 로그인 설정 push(기존 원격 설정은 유지), migration 3개(private 스키마·RPC 12개·Realtime 정책·pg_cron 정리) 적용, 파일럿 코드 해시 저장, tests/db 33개 통과. create_room을 RPC로 구현(PRD v1.3, D-019).
+- 관련 ai-log: AI-004

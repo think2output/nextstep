@@ -64,10 +64,12 @@ PRD와 다른 문서가 충돌하면 **PRD가 우선**이다. 다른 문서를 P
 
 ```
 docs/            PRD, 설계, 결정, 테스트 결과, AI 로그, 진행 상태
-src/             프런트엔드 (React + TS + Vite) — 아직 미생성
+src/             프런트엔드 (React + TS + Vite)
+src/gate/        GATE-01 시험 페이지 (시험 전용, 제품 코드 아님)
+src/pip/         PiP 공통 (usePip, ScrollArea)
 src/shared/      서버·클라이언트 공통 enum·타입·문구
-supabase/migrations/  schema, RPC, grants, realtime policies
-tests/           상태·권한·통합 테스트
+supabase/migrations/  schema(private), RPC(public), realtime 권한·정리 작업
+tests/db/        실제 Supabase에 대고 도는 RPC·권한 테스트 (vitest)
 seed/            공개 가능한 가상 데이터만 (실명·실제 질문 금지)
 ```
 
@@ -80,6 +82,15 @@ npm install      # 의존성 설치
 npm run dev      # 개발 서버 http://localhost:5173 (localhost는 HTTPS 없이 PiP 동작)
 npm run build    # 타입 검사 + 빌드
 npm run lint     # oxlint
+npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
+
+npx supabase db push --linked --dry-run   # 적용 예정 migration 확인
+npx supabase db push --linked             # migration 원격 적용 (supabase login 필요)
+npx supabase db query --linked "<sql>"    # 원격 SQL 실행
+npx supabase db advisors --linked         # 보안·성능 점검
 ```
 
-현재 화면은 GATE-01 시험 페이지(`src/gate/`)뿐이다. PiP 공통 로직은 `src/pip/usePip.ts`.
+- DB 변경은 반드시 새 migration 파일로 한다. 이미 적용된 migration 파일을 고치지 않는다.
+- 공개 RPC를 추가하면 rpc migration 끝의 권한 블록처럼 `revoke ... from public, anon` + `grant ... to authenticated`를 함께 넣는다.
+- 파일럿 코드 원문은 `.env.local`의 `PILOT_CODE`(VITE_ 접두사 금지 → 번들에 안 들어감). DB에는 bcrypt 해시만 `private.app_secrets.pilot_code_hash`.
+- 현재 화면은 GATE-01 시험 페이지(`src/gate/`)뿐이다. 실제 앱 화면은 DEV03부터.
