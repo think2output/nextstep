@@ -168,11 +168,19 @@ button:disabled {
   margin-bottom: 4px;
 }
 
-/* 질문 탭 목업 (PRD 8.6). 작은 창에서는 세로 스크롤, 가로 넘침 금지 */
+/* 질문 탭 목업 (PRD 8.6). 목록 우선, 한 줄 요약 + 눌러서 펼치기. 세로 스크롤만, 가로 넘침 금지 */
+.qm-write {
+  width: 100%;
+  min-height: 32px;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
 .qm-input {
   width: 100%;
   box-sizing: border-box;
-  height: 56px;
+  height: 52px;
+  margin-top: 4px;
   resize: none;
   font: inherit;
   font-size: 13px;
@@ -190,7 +198,6 @@ button:disabled {
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-  margin-top: 4px;
   font-size: 12px;
 }
 
@@ -200,30 +207,60 @@ button:disabled {
   font-size: 12px;
 }
 
-.qm-row button[aria-pressed='true'] {
-  border-color: var(--accent);
-  border-width: 2px;
-}
-
-.qm-note {
-  margin: 4px 0 6px;
-  font-size: 11px;
-  color: var(--muted);
-}
-
 .qm-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.qm-card {
+.qm-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   border-top: 1px solid var(--line);
-  padding: 6px 0;
+  padding: 2px 0;
 }
 
-.qm-body {
-  margin: 0;
+.qm-line {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  text-align: left;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qm-line.qm-open {
+  white-space: normal;
   overflow-wrap: anywhere;
+  padding: 4px 2px;
+}
+
+.qm-react {
+  flex: none;
+  min-height: 32px;
+  min-width: 44px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+button.qm-react[aria-pressed='true'] {
+  border-color: var(--accent);
+  border-width: 2px;
+  font-weight: 700;
+}
+
+.qm-similar {
+  margin-top: 4px;
+}
+
+.qm-similar-title {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 600;
 }
