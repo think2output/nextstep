@@ -4,8 +4,8 @@
 
 ## 현재 단계
 
-- 단계: **DEV01 진행 중 — GATE-01 시험 페이지(로컬) 완성, 사람이 직접 시험할 차례**
-- 다음 작업: `npm run dev` → 사용자가 G1~G4·G7 직접 시험 → `docs/gate-01.md`에 결과 기록. G5·G6·G8은 Supabase 연결 후.
+- 단계: **DEV01 진행 중 — 로컬 시험(1차) 통과. G1·G2·G3 통과, PiP 방식 유지**
+- 다음 작업: Supabase 프로젝트 생성(사용자) → 시험 페이지에 실시간 연결 추가 → 두 기기로 G5·G6·G8 시험. 동시에 멘토에게 DB 사용 허용 확인.
 - 막힌 것: 없음
 
 ## 작업 목록 (PRD 22장)
@@ -49,7 +49,8 @@
 ### 2026-10-28
 - git init, GitHub 공개 저장소 think2output/nextstep 생성·push.
 - docs/prompts.md(프롬프트 모음) 추가.
-- Vite + React + TS 초기화. GATE-01 시험 페이지(`src/gate/GatePage.tsx`), PiP 훅(`src/pip/usePip.ts`) 작성. 빌드 통과. 실제 PiP 동작은 아직 사람이 시험하지 않음.
+- Vite + React + TS 초기화. GATE-01 시험 페이지(`src/gate/GatePage.tsx`), PiP 훅(`src/pip/usePip.ts`) 작성. 빌드 통과.
+- GATE-01 1차 시험(로컬, Chrome 155, 1920×1080): G1·G2·G3·G4-a·G4-b 통과, G7 부분 통과. 결과는 `docs/gate-01.md`.
 - 저장소 골격 생성: CLAUDE.md, AGENTS.md, README.md, docs/*, .env.example, .gitignore, 빈 폴더.
 - 원본 PRD(`NextStep_PRD_v1.0_KO.md`)를 `docs/PRD.md`로 이동.
 - 코드·패키지 초기화는 아직 하지 않음.
