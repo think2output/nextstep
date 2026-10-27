@@ -4,8 +4,8 @@
 
 ## 현재 단계
 
-- 단계: **DEV02 완료 — DB 스키마·RPC 12개·Realtime 권한·정리 작업 원격 적용, DB 자동 테스트 33개 통과**
-- 다음 작업: DEV03 방 생성·참여 화면 + DEV04 snapshot·Realtime·재연결 클라이언트 (src/ 실제 앱). 남은 GATE 항목(G5·G6 10분·G7)은 병행.
+- 단계: **DEV03·DEV04 1차 완료 — 실제 앱 화면(시작·방·작은 창) + snapshot·Realtime·heartbeat 연결. 헤드리스 Chrome 연기 시험 7단계 통과**
+- 다음 작업: 사용자가 실제 PiP로 강사·학생 흐름 확인 → 다듬기. 이후 Vercel 배포(HTTPS), DEV07 접근성·크기 검수, 남은 GATE 항목.
 - 막힌 것: 없음
 
 ## 작업 목록 (PRD 22장)
@@ -14,8 +14,8 @@
 |---|---|---|---|---|
 | DEV01 PiP 기술 검증 | 완료(일부 항목 남음) | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
 | DEV02 데이터 모델·권한 | 완료 | DEV01 | migration·권한 테스트 | |
-| DEV03 방 생성·참여·익명 세션 | 대기 | DEV02 | 두 기기 참여 | |
-| DEV04 snapshot·Realtime·재연결 | 대기 | DEV03 | 원격 상태 동기화 | |
+| DEV03 방 생성·참여·익명 세션 | 1차 완료 | DEV02 | 두 기기 참여 | |
+| DEV04 snapshot·Realtime·재연결 | 1차 완료 | DEV03 | 원격 상태 동기화 | |
 | DEV05 요청·응답·집계 | 대기 | DEV04 | AT15~28 | |
 | DEV06 질문·공감·완료·숨김 | 대기 | DEV04 | AT29~46 | |
 | DEV07 작은 창 통합·접근성 | 대기 | DEV05/06 | 앱 전환·크기 검수 | |
@@ -59,3 +59,5 @@
 - 두 창 실시간 시험 페이지(src/gate/useGateChannel.ts, 시험 전용 공개 Broadcast). Node 자체 시험: 두 클라이언트 간 Broadcast 전달 성공(73ms). 크기 전환은 사용자 '되는 것 같음' — 정식 확인은 보류.
 - DEV02: supabase/migrations 3개(schema, rpc, realtime_cleanup) 원격 적용. 익명 로그인 켬, 익명 로그인 제한 30→300/시간(교실 공용 IP 대비). 파일럿 코드 bcrypt 해시 저장(원문은 .env.local PILOT_CODE). tests/db 33개 통과. db advisors: 의도된 WARN만.
 - 미구현·후속: telemetry 테이블(P1), Realtime 'public access' 끄기(GATE 시험 페이지가 공개 채널 사용 중이라 보류), 30명 정원 실측(AT06·AT56), 24시간 만료 경계 시험.
+- DEV03·04: src/pages(StartPage, RoomPage), src/room(useRoom 상태 저장소, PipView, AnswerViews, QuestionView), src/styles(TDS 참고 토큰). /gate는 시험 페이지로 분리(lazy). 강사 snapshot에 join_code 추가(migration 0300). tests/e2e/smoke.mjs(헤드리스 Chrome 2프로필) 통과. 실제 PiP 창에서의 확인은 사용자 몫.
+- 알려진 미흡: 학생은 답변 완료 질문 목록을 볼 수 없음(미답변만), 질문 50개 초과 '더 보기' 없음, 연결 미확인 30초 후 '다시 연결'은 채널만 재생성.

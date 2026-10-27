@@ -10,6 +10,7 @@ import {
   type PipSize,
   usePip,
 } from '../pip/usePip'
+import './gate.css'
 import QuestionMock, { type QuestionSort } from './QuestionMock'
 import { type Role, useGateChannel } from './useGateChannel'
 

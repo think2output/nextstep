@@ -54,6 +54,10 @@ describe('익명성 (Q-02)', () => {
       expect(text).not.toContain('author')
       expect(text).not.toContain('member_id')
     }
+    // 참여 코드는 강사 snapshot에만
+    expect((await snapshot(host, room.room_id)).room.join_code).toBe(room.join_code)
+    expect((await snapshot(b, room.room_id)).room.join_code).toBeUndefined()
+
     // 다른 학생에게는 집계도 없다
     const bSnap = await snapshot(b, room.room_id)
     expect(bSnap.active_round.no_count).toBeUndefined()

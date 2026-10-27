@@ -67,8 +67,12 @@ docs/            PRD, 설계, 결정, 테스트 결과, AI 로그, 진행 상태
 src/             프런트엔드 (React + TS + Vite)
 src/gate/        GATE-01 시험 페이지 (시험 전용, 제품 코드 아님)
 src/pip/         PiP 공통 (usePip, ScrollArea)
+src/room/        방 상태(useRoom)·작은 창 화면(PipView, AnswerViews, QuestionView)
+src/pages/       StartPage, RoomPage
+src/styles/      tokens.css, app.css
 src/shared/      서버·클라이언트 공통 enum·타입·문구
 supabase/migrations/  schema(private), RPC(public), realtime 권한·정리 작업
+tests/e2e/       헤드리스 Chrome 연기 시험
 tests/db/        실제 Supabase에 대고 도는 RPC·권한 테스트 (vitest)
 seed/            공개 가능한 가상 데이터만 (실명·실제 질문 금지)
 ```
@@ -82,6 +86,7 @@ npm install      # 의존성 설치
 npm run dev      # 개발 서버 http://localhost:5173 (localhost는 HTTPS 없이 PiP 동작)
 npm run build    # 타입 검사 + 빌드
 npm run lint     # oxlint
+npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (npm run dev 켜둔 상태, 설치된 Chrome 사용)
 npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
 
 npx supabase db push --linked --dry-run   # 적용 예정 migration 확인
@@ -93,4 +98,5 @@ npx supabase db advisors --linked         # 보안·성능 점검
 - DB 변경은 반드시 새 migration 파일로 한다. 이미 적용된 migration 파일을 고치지 않는다.
 - 공개 RPC를 추가하면 rpc migration 끝의 권한 블록처럼 `revoke ... from public, anon` + `grant ... to authenticated`를 함께 넣는다.
 - 파일럿 코드 원문은 `.env.local`의 `PILOT_CODE`(VITE_ 접두사 금지 → 번들에 안 들어감). DB에는 bcrypt 해시만 `private.app_secrets.pilot_code_hash`.
-- 현재 화면은 GATE-01 시험 페이지(`src/gate/`)뿐이다. 실제 앱 화면은 DEV03부터.
+- 화면: `/` 시작, `/join?code=` 참여 링크, `/room/<id>` 방, `/gate` GATE-01 시험 페이지(시험 전용). 상태는 `src/room/useRoom.ts` 하나가 원래 탭·작은 창 공유.
+- 디자인 토큰은 `src/styles/tokens.css`(TDS 참고, Toss 로고·이름·전용 폰트 금지). 작은 창 전용 규칙은 `.pip-doc`·`.pv`·`.qv` 아래.

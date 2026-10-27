@@ -59,6 +59,8 @@ export function usePip(onClosed?: () => void) {
   const [status, setStatus] = useState<PipStatus>(api ? 'closed' : 'unsupported')
   const [pipWindow, setPipWindow] = useState<Window | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // 닫힌 뒤에는 '다시 열기'로 안내한다 (PIP-03)
+  const [wasOpened, setWasOpened] = useState(false)
 
   // 반드시 사용자 클릭 핸들러 안에서 호출한다 (PIP-01: 자동 열기 금지)
   const open = useCallback(
@@ -82,6 +84,7 @@ export function usePip(onClosed?: () => void) {
         })
         setPipWindow(win)
         setStatus('open')
+        setWasOpened(true)
       } catch (e) {
         setStatus('failed')
         setError(e instanceof Error ? e.message : String(e))
@@ -90,5 +93,5 @@ export function usePip(onClosed?: () => void) {
     [api, onClosed],
   )
 
-  return { status, pipWindow, error, open }
+  return { status, pipWindow, error, open, wasOpened }
 }

@@ -157,3 +157,10 @@
   > Supabase에 로그인했어.
 - 결과 요약: supabase init/link, 익명 로그인 설정 push(기존 원격 설정은 유지), migration 3개(private 스키마·RPC 12개·Realtime 정책·pg_cron 정리) 적용, 파일럿 코드 해시 저장, tests/db 33개 통과. create_room을 RPC로 구현(PRD v1.3, D-019).
 - 관련 ai-log: AI-004
+
+### P-020 | 2026-10-28 | 구현 | DEV03, DEV04, PRD 8장
+- 목적: 실제 앱 화면 구현, 디자인 방향 지정
+- 프롬프트:
+  > 토스 디자인 시스템(TDS)을 참고해서 만들고 싶어. 다만 우리는 아주 작은 창이니까 거기에 맞게 바꿔서 해 보자.
+- 결과 요약: TDS 색·형태를 참고한 자체 토큰 + Pretendard(Toss 로고·이름·전용 폰트 미사용). 시작·방·작은 창(강사/학생 응답, 질문) 화면을 서버 RPC·Realtime에 연결. 헤드리스 Chrome 연기 시험 통과.
+- 관련 ai-log: AI-006

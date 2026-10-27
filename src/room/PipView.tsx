@@ -1,0 +1,92 @@
+// 작은 창 내용 (PRD 8.2~8.7). 원래 탭의 미리보기 틀과 PiP 창에 같은 컴포넌트를 쓴다.
+import { type MouseEvent, useState } from 'react'
+import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, resizePip } from '../pip/usePip'
+import { HostAnswer, StudentAnswer } from './AnswerViews'
+import QuestionView from './QuestionView'
+import type { RoomStore } from './useRoom'
+
+export type PipTab = 'answer' | 'question'
+
+type Props = {
+  store: RoomStore
+  tab: PipTab
+  setTab: (tab: PipTab) => void
+  compact: boolean
+  setCompact: (compact: boolean) => void
+  draft: string
+  setDraft: (value: string) => void
+}
+
+export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft }: Props) {
+  const snap = store.snap!
+  const isHost = snap.my_role === 'host'
+  const activeId = snap.active_round?.id ?? null
+
+  // 질문 탭에 있는 동안 새 요청이 오면 배지만 표시. 자동 탭 이동·크기 변경 없음 (PIP-04)
+  const [seenRound, setSeenRound] = useState(activeId)
+  if (tab === 'answer' && seenRound !== activeId) setSeenRound(activeId)
+  const newRequest = !isHost && tab === 'question' && activeId !== null && activeId !== seenRound
+
+  const toggleCompact = (e: MouseEvent<HTMLButtonElement>) => {
+    const next = !compact
+    setCompact(next)
+    // 작은 창 안의 클릭일 때만 그 창 크기를 바꾼다 (Chrome: PiP 창의 사용자 클릭 필요)
+    const win = e.currentTarget.ownerDocument.defaultView
+    if (win && win !== window) resizePip(win, next ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
+  }
+
+  const conn =
+    store.conn === 'live' ? (
+      <span className="pv-conn pv-conn-live" title="연결됨" aria-label="연결됨">●</span>
+    ) : store.conn === 'unavailable' ? (
+      <button type="button" className="pv-icon pv-conn pv-conn-bad" onClick={store.reconnect}>다시 연결</button>
+    ) : (
+      <span className="pv-conn pv-conn-bad" aria-live="polite">{store.conn === 'connecting' ? '연결 중' : '재연결 중'}</span>
+    )
+
+  return (
+    <div className={`pv${compact ? ' pv-compact' : ''}`}>
+      <div className="pv-bar">
+        <button type="button" className="pv-tab" aria-pressed={tab === 'answer'} onClick={() => setTab('answer')}>
+          응답
+          {newRequest && <span className="pv-badge" role="status" aria-label="새 응답 요청" />}
+        </button>
+        <button type="button" className="pv-tab" aria-pressed={tab === 'question'} onClick={() => setTab('question')}>
+          질문 {snap.pending_question_count}
+        </button>
+        <span className="pv-spacer" />
+        {tab === 'question' && (
+          <button
+            type="button"
+            className="pv-icon"
+            aria-label={`정렬: ${store.sort === 'popular' ? '저도 궁금해요 많은 순' : '최신순'}. 눌러서 바꾸기`}
+            title={store.sort === 'popular' ? '🙋 많은 순 (눌러서 최신순)' : '최신순 (눌러서 🙋 많은 순)'}
+            onClick={() => store.setSort(store.sort === 'popular' ? 'latest' : 'popular')}
+          >
+            {store.sort === 'popular' ? '🙋⇅' : '🕒⇅'}
+          </button>
+        )}
+        {conn}
+        <button
+          type="button"
+          className="pv-icon"
+          aria-label={compact ? '기본 크기로' : '더 작게'}
+          title={compact ? '기본 크기로' : '더 작게'}
+          onClick={toggleCompact}
+        >
+          {compact ? '⤢' : '⤡'}
+        </button>
+      </div>
+
+      {snap.room.status === 'ended' && <p className="pv-ended">종료된 방이에요 · 읽기만 가능</p>}
+
+      <div className={`pv-body${tab === 'answer' ? ' pv-scroll-body' : ''}`}>
+        {tab === 'answer' ? (
+          isHost ? <HostAnswer store={store} /> : <StudentAnswer store={store} />
+        ) : (
+          <QuestionView store={store} draft={draft} setDraft={setDraft} />
+        )}
+      </div>
+    </div>
+  )
+}

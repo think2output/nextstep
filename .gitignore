@@ -11,3 +11,6 @@ Thumbs.db
 supabase/.temp/
 supabase/.branches/
 coverage/
+
+# 화면 연기 시험 스크린샷
+tests/e2e/*.png
