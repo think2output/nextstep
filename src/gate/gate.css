@@ -275,3 +275,21 @@ button.qm-react[aria-pressed='true'] {
   justify-content: center;
   color: var(--muted);
 }
+
+/* 아이콘 버튼 (정렬·남기기): 32×32로 공간 절약, 의미는 aria-label·title로 */
+.pip-icon,
+.qm-compose .qm-send {
+  flex: none;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 4px;
+  font-size: 13px;
+}
+
+.pip-tabs .pip-icon {
+  margin-left: auto;
+}
+
+.pip-icon + .pip-conn {
+  margin-left: 0;
+}

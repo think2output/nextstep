@@ -10,7 +10,7 @@ import {
   type PipSize,
   usePip,
 } from '../pip/usePip'
-import QuestionMock from './QuestionMock'
+import QuestionMock, { type QuestionSort } from './QuestionMock'
 import { type Role, useGateChannel } from './useGateChannel'
 
 type Tab = 'answer' | 'question'
@@ -69,6 +69,7 @@ function GateRoom({ role }: { role: Role }) {
   const [compact, setCompact] = useState(false)
   // 질문 탭에서 창을 키울지: 키우면 화면 가장자리에서 창 위치가 밀릴 수 있다 (gate-01.md 2차 발견)
   const [growOnQuestion, setGrowOnQuestion] = useState(false)
+  const [questionSort, setQuestionSort] = useState<QuestionSort>('popular')
   const [maxGapMs, setMaxGapMs] = useState(0)
 
   // 원래 탭 보임/포커스 기록
@@ -211,6 +212,17 @@ function GateRoom({ role }: { role: Role }) {
       <div className="pip-tabs">
         <button type="button" aria-pressed={tab === 'answer'} onClick={() => changeTab('answer')}>응답</button>
         <button type="button" aria-pressed={tab === 'question'} onClick={() => changeTab('question')}>질문</button>
+        {tab === 'question' && (
+          <button
+            type="button"
+            className="pip-icon"
+            aria-label={`정렬: ${questionSort === 'popular' ? '저도 궁금해요 많은 순' : '최신순'}. 눌러서 바꾸기`}
+            title={questionSort === 'popular' ? '🙋 많은 순 (눌러서 최신순)' : '최신순 (눌러서 🙋 많은 순)'}
+            onClick={() => setQuestionSort(questionSort === 'popular' ? 'latest' : 'popular')}
+          >
+            {questionSort === 'popular' ? '🙋⇅' : '🕒⇅'}
+          </button>
+        )}
         <span className="pip-conn" title={connLabel} aria-label={connLabel}>
           {live.conn === 'live' ? '●' : '⚠'}
         </span>
@@ -226,7 +238,7 @@ function GateRoom({ role }: { role: Role }) {
           </button>
         )}
       </div>
-      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <QuestionMock />}
+      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <QuestionMock sort={questionSort} />}
     </div>
   )
 

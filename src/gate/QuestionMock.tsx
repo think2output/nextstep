@@ -8,7 +8,7 @@ const SEARCH_MIN_CHARS = 2
 const MATCH_THRESHOLD = 0.5
 
 type MockQuestion = { id: number; body: string; createdAt: number; count: number; mine: boolean; reacted: boolean }
-type Sort = 'popular' | 'latest'
+export type QuestionSort = 'popular' | 'latest'
 
 const BASE = Date.now()
 const SAMPLES: MockQuestion[] = [
@@ -57,10 +57,10 @@ function matchScore(query: string, body: string) {
   return Math.max(common / q.size, wordHit ? 1 : 0)
 }
 
-export default function QuestionMock() {
+// 정렬 버튼은 공간 절약을 위해 작은 창의 탭 줄에 있으므로 정렬 값은 부모가 가진다
+export default function QuestionMock({ sort }: { sort: QuestionSort }) {
   const [draft, setDraft] = useState('')
   const [list, setList] = useState(SAMPLES)
-  const [sort, setSort] = useState<Sort>('popular')
   const [openId, setOpenId] = useState<number | null>(null)
   const len = Array.from(draft.trim()).length
   const searching = len >= SEARCH_MIN_CHARS
@@ -100,28 +100,29 @@ export default function QuestionMock() {
           value={draft}
           maxLength={MAX_LEN * 2}
           rows={1}
-          placeholder="질문 쓰기 · 비슷한 질문 찾기"
-          aria-label="질문 입력. 쓰는 동안 비슷한 질문이 아래에 표시됩니다"
+          placeholder="익명 질문·찾기 (이름·키 X)"
+          aria-label="익명 질문 입력. 쓰는 동안 비슷한 질문이 아래에 표시됩니다. 이름이나 API 키는 적지 마세요"
           onChange={(e) => setDraft(e.target.value)}
         />
-        <button type="button" disabled={len < 1 || len > MAX_LEN} onClick={submit}>남기기</button>
+        <button
+          type="button"
+          className="qm-send"
+          aria-label="질문 남기기"
+          title="질문 남기기"
+          disabled={len < 1 || len > MAX_LEN}
+          onClick={submit}
+        >
+          ➤
+        </button>
       </div>
 
-      <div className="qm-head" aria-live="polite">
-        {searching ? (
-          <>
-            <span>{shown.length > 0 ? `비슷한 질문 ${shown.length} · 같으면 🙋` : '비슷한 질문 없음 · 남겨주세요'}</span>
-            <span className={len > MAX_LEN ? 'error' : 'hint'}>{len}/{MAX_LEN}</span>
-          </>
-        ) : (
-          <>
-            <span className="hint">질문 {list.length} · 이름·API 키 X</span>
-            <button type="button" onClick={() => setSort(sort === 'popular' ? 'latest' : 'popular')}>
-              {sort === 'popular' ? '🙋많은순' : '최신순'} ⇅
-            </button>
-          </>
-        )}
-      </div>
+      {/* 쓰는 중에만 한 줄 상태 표시 */}
+      {searching && (
+        <div className="qm-head" aria-live="polite">
+          <span>{shown.length > 0 ? `비슷한 질문 ${shown.length} · 같으면 🙋` : '비슷한 질문 없음 · ➤로 남기기'}</span>
+          <span className={len > MAX_LEN ? 'error' : 'hint'}>{len}/{MAX_LEN}</span>
+        </div>
+      )}
 
       <ul className="qm-list">
         {shown.map((q) => {
