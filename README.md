@@ -40,6 +40,7 @@ _구현 후 작성 (PRD 23.4 항목: 런타임 버전, 설치, Supabase 설정, 
 | `docs/gate-01.md` | PiP 기술 검증 기록 |
 | `docs/test-report.md` | 인수 테스트 결과 |
 | `docs/ai-log.md` | AI 활용·수정 기록 |
+| `docs/prompts.md` | 사용한 프롬프트 모음 |
 | `CLAUDE.md` / `AGENTS.md` | AI 에이전트 작업 규칙 |
 
 ## 알려진 한계

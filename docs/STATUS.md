@@ -35,9 +35,20 @@
 | 강사 질문 확인 운영 담당 | 쉬는 시간·종료 전 | 인터뷰 | 미확인 |
 | 배포 공급자 | HTTPS 정적 호스팅 | 2일차 | 미정 |
 
+## 제출물 (과제 요건)
+
+| 항목 | 필수 | 상태 |
+|---|---|---|
+| GitHub 주소 (코드 + README 실행 방법) | 필수 | 저장소 생성됨, 내용 진행 중 |
+| 발표 자료 (PPT/PDF) | 필수 | 미착수 |
+| 배포 주소 | 택1 이상 | 미착수 (Vercel 검토) |
+| 시연 영상 1~3분 (핵심 흐름 + 방어 장면) | 택1 이상 | 미착수 |
+
 ## 작업 기록
 
 ### 2026-10-28
+- git init, GitHub 공개 저장소 think2output/nextstep 생성·push.
+- docs/prompts.md(프롬프트 모음) 추가.
 - 저장소 골격 생성: CLAUDE.md, AGENTS.md, README.md, docs/*, .env.example, .gitignore, 빈 폴더.
 - 원본 PRD(`NextStep_PRD_v1.0_KO.md`)를 `docs/PRD.md`로 이동.
 - 코드·패키지 초기화는 아직 하지 않음.
