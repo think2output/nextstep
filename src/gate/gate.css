@@ -75,14 +75,20 @@ button:disabled {
 
 /* 작은 창 내용 (PRD 8.2~8.4). 기본 240×160, 더 작게 200×120, 질문 380×480 */
 .pip {
-  padding: 6px;
+  padding: 0 6px 6px;
   box-sizing: border-box;
 }
 
+/* 질문 목록이 길어 스크롤해도 탭은 위에 고정 */
 .pip-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   gap: 4px;
+  padding-top: 6px;
   margin-bottom: 6px;
+  background: var(--bg);
 }
 
 .pip-tabs button {
@@ -160,4 +166,64 @@ button:disabled {
 
 .pip-compact .pip-tabs {
   margin-bottom: 4px;
+}
+
+/* 질문 탭 목업 (PRD 8.6). 작은 창에서는 세로 스크롤, 가로 넘침 금지 */
+.qm-input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 56px;
+  resize: none;
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.qm-input:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.qm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.qm-row button {
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.qm-row button[aria-pressed='true'] {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.qm-note {
+  margin: 4px 0 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.qm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.qm-card {
+  border-top: 1px solid var(--line);
+  padding: 6px 0;
+}
+
+.qm-body {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
 }

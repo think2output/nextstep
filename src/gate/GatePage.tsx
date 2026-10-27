@@ -10,6 +10,7 @@ import {
   type PipSize,
   usePip,
 } from '../pip/usePip'
+import QuestionMock from './QuestionMock'
 import { type Role, useGateChannel } from './useGateChannel'
 
 type Tab = 'answer' | 'question'
@@ -66,6 +67,8 @@ function GateRoom({ role }: { role: Role }) {
   const [pipSize, setPipSize] = useState('')
   const [tab, setTab] = useState<Tab>('answer')
   const [compact, setCompact] = useState(false)
+  // 질문 탭에서 창을 키울지: 키우면 화면 가장자리에서 창 위치가 밀릴 수 있다 (gate-01.md 2차 발견)
+  const [growOnQuestion, setGrowOnQuestion] = useState(false)
   const [maxGapMs, setMaxGapMs] = useState(0)
 
   // 원래 탭 보임/포커스 기록
@@ -142,11 +145,13 @@ function GateRoom({ role }: { role: Role }) {
     addLog(ok ? `크기 변경 요청 ${size.width}×${size.height}` : '크기 변경 실패')
   }
 
-  // 질문 탭은 사용자가 눌렀을 때만 크게 (PRD 8.2). 응답 탭으로 오면 이전 크기로.
+  // 질문 탭 확장은 옵션을 켰을 때만. 끄면 탭을 바꿔도 창 크기·위치가 그대로다.
   const changeTab = (next: Tab) => {
     if (next === tab) return
     setTab(next)
-    resizeTo(next === 'question' ? PIP_SIZE_QUESTION : compact ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
+    if (growOnQuestion) {
+      resizeTo(next === 'question' ? PIP_SIZE_QUESTION : compact ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
+    }
   }
 
   const toggleCompact = () => {
@@ -202,14 +207,14 @@ function GateRoom({ role }: { role: Role }) {
   )
 
   const pipContent = (
-    <div className={`pip${compact && tab === 'answer' ? ' pip-compact' : ''}`}>
+    <div className={`pip${compact ? ' pip-compact' : ''}`}>
       <div className="pip-tabs">
         <button type="button" aria-pressed={tab === 'answer'} onClick={() => changeTab('answer')}>응답</button>
         <button type="button" aria-pressed={tab === 'question'} onClick={() => changeTab('question')}>질문</button>
         <span className="pip-conn" title={connLabel} aria-label={connLabel}>
           {live.conn === 'live' ? '●' : '⚠'}
         </span>
-        {tab === 'answer' && (
+        {(tab === 'answer' || !growOnQuestion) && (
           <button
             type="button"
             className="pip-size"
@@ -221,7 +226,7 @@ function GateRoom({ role }: { role: Role }) {
           </button>
         )}
       </div>
-      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <p className="pip-q">질문 탭 자리 (크기 시험용)</p>}
+      {tab === 'answer' ? (isHost ? hostBody : studentBody) : <QuestionMock />}
     </div>
   )
 
@@ -251,6 +256,10 @@ function GateRoom({ role }: { role: Role }) {
           작은 창 띄우기
         </button>
         {status === 'open' && <p className="hint">작은 창을 사용하는 동안 이 탭은 닫지 마세요.</p>}
+        <label className="row">
+          <input type="checkbox" checked={growOnQuestion} onChange={(e) => setGrowOnQuestion(e.target.checked)} />
+          질문 탭 누르면 창 키우기 (380×480, 위치가 밀릴 수 있음)
+        </label>
       </section>
 
       {isHost && (
