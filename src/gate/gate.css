@@ -372,3 +372,61 @@ button.qm-react[aria-pressed='true'] {
   margin-top: 4px;
   padding-right: 2px;
 }
+
+/* 직접 만든 스크롤바 (src/pip/ScrollArea.tsx). 기본 스크롤바는 숨기고 휠·키보드 스크롤은 유지 */
+.scroll-area {
+  position: relative;
+  min-height: 0;
+}
+
+.scroll-view {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-right: 12px;
+  box-sizing: border-box;
+}
+
+.scroll-view::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-track {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 10px;
+  border-radius: 5px;
+  background: #f0f0f0;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.scroll-thumb {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  border-radius: 4px;
+  background: #9a9a9a;
+  cursor: grab;
+  touch-action: none;
+}
+
+.scroll-thumb:active {
+  background: #6a6a6a;
+  cursor: grabbing;
+}
+
+/* 질문 탭: 스크롤 영역이 남은 높이를 채운다 (이전 .qm-list 스크롤 규칙 대체) */
+.pip-doc .pip-body-question .qm-scroll {
+  flex: 1;
+  margin-top: 4px;
+}
+
+.pip-doc .pip-body-question .qm-list {
+  flex: none;
+  overflow: visible;
+  margin-top: 0;
+  padding-right: 0;
+}

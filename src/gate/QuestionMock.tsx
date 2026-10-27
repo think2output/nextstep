@@ -2,6 +2,7 @@
 // 입력칸 하나로 찾기와 쓰기를 겸한다: 쓰는 동안 목록이 비슷한 질문만 남아 중복 질문을 줄인다.
 // 비슷한 질문 표시는 사용자가 고르는 것이며 자동 병합이 아니다 (PRD 3.3 제외 범위: 자동 질문 병합).
 import { useMemo, useState } from 'react'
+import ScrollArea from '../pip/ScrollArea'
 
 const MAX_LEN = 200
 const SEARCH_MIN_CHARS = 2
@@ -124,38 +125,40 @@ export default function QuestionMock({ sort }: { sort: QuestionSort }) {
         </div>
       )}
 
-      <ul className="qm-list">
-        {shown.map((q) => {
-          const open = openId === q.id
-          return (
-            <li key={q.id} className="qm-item">
-              <button
-                type="button"
-                className={`qm-line${open ? ' qm-open' : ''}`}
-                aria-expanded={open}
-                title={q.body}
-                onClick={() => setOpenId(open ? null : q.id)}
-              >
-                {q.body}
-              </button>
-              {q.mine ? (
-                <span className="qm-react qm-mine" title="내 질문">나 🙋{q.count}</span>
-              ) : (
+      <ScrollArea className="qm-scroll">
+        <ul className="qm-list">
+          {shown.map((q) => {
+            const open = openId === q.id
+            return (
+              <li key={q.id} className="qm-item">
                 <button
                   type="button"
-                  className="qm-react"
-                  aria-pressed={q.reacted}
-                  aria-label={`저도 궁금해요 ${q.count}`}
-                  title={`${hhmm(q.createdAt)} · 저도 궁금해요`}
-                  onClick={() => toggle(q.id)}
+                  className={`qm-line${open ? ' qm-open' : ''}`}
+                  aria-expanded={open}
+                  title={q.body}
+                  onClick={() => setOpenId(open ? null : q.id)}
                 >
-                  🙋{q.count}
+                  {q.body}
                 </button>
-              )}
-            </li>
-          )
-        })}
-      </ul>
+                {q.mine ? (
+                  <span className="qm-react qm-mine" title="내 질문">나 🙋{q.count}</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="qm-react"
+                    aria-pressed={q.reacted}
+                    aria-label={`저도 궁금해요 ${q.count}`}
+                    title={`${hhmm(q.createdAt)} · 저도 궁금해요`}
+                    onClick={() => toggle(q.id)}
+                  >
+                    🙋{q.count}
+                  </button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </ScrollArea>
     </div>
   )
 }
