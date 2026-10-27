@@ -4,15 +4,15 @@
 
 ## 현재 단계
 
-- 단계: **착수 전 — 저장소 골격만 존재**
-- 다음 작업: DEV01 PiP 기술 검증(GATE-01). 결과에 따라 DEV02 진행 여부 결정.
+- 단계: **DEV01 진행 중 — GATE-01 시험 페이지(로컬) 완성, 사람이 직접 시험할 차례**
+- 다음 작업: `npm run dev` → 사용자가 G1~G4·G7 직접 시험 → `docs/gate-01.md`에 결과 기록. G5·G6·G8은 Supabase 연결 후.
 - 막힌 것: 없음
 
 ## 작업 목록 (PRD 22장)
 
 | 작업 | 상태 | 선행 | 완료 증거 | 비고 |
 |---|---|---|---|---|
-| DEV01 PiP 기술 검증 | 대기 | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
+| DEV01 PiP 기술 검증 | 진행 중 | 없음 | `docs/gate-01.md` 기록 | G2·G3·G6 실패 시 PRD 수정 |
 | DEV02 데이터 모델·권한 | 대기 | DEV01 | migration·권한 테스트 | |
 | DEV03 방 생성·참여·익명 세션 | 대기 | DEV02 | 두 기기 참여 | |
 | DEV04 snapshot·Realtime·재연결 | 대기 | DEV03 | 원격 상태 동기화 | |
@@ -49,6 +49,7 @@
 ### 2026-10-28
 - git init, GitHub 공개 저장소 think2output/nextstep 생성·push.
 - docs/prompts.md(프롬프트 모음) 추가.
+- Vite + React + TS 초기화. GATE-01 시험 페이지(`src/gate/GatePage.tsx`), PiP 훅(`src/pip/usePip.ts`) 작성. 빌드 통과. 실제 PiP 동작은 아직 사람이 시험하지 않음.
 - 저장소 골격 생성: CLAUDE.md, AGENTS.md, README.md, docs/*, .env.example, .gitignore, 빈 폴더.
 - 원본 PRD(`NextStep_PRD_v1.0_KO.md`)를 `docs/PRD.md`로 이동.
 - 코드·패키지 초기화는 아직 하지 않음.

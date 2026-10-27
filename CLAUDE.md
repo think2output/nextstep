@@ -73,4 +73,13 @@ seed/            공개 가능한 가상 데이터만 (실명·실제 질문 금
 
 ## 7. 명령
 
-아직 프로젝트가 초기화되지 않았다. 초기화 후 실제로 실행해 확인한 명령만 여기에 추가한다.
+실제로 실행해 확인한 명령만 적는다. (Node v24.21.0, npm 11.19.0에서 확인)
+
+```
+npm install      # 의존성 설치
+npm run dev      # 개발 서버 http://localhost:5173 (localhost는 HTTPS 없이 PiP 동작)
+npm run build    # 타입 검사 + 빌드
+npm run lint     # oxlint
+```
+
+현재 화면은 GATE-01 시험 페이지(`src/gate/`)뿐이다. PiP 공통 로직은 `src/pip/usePip.ts`.
