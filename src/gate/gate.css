@@ -430,3 +430,26 @@ button.qm-react[aria-pressed='true'] {
   margin-top: 0;
   padding-right: 0;
 }
+
+/* 사용자 요청: 🙋 버튼은 더 작게, 스크롤 막대는 더 넓게 (잡기 쉽게) */
+.qm-react {
+  min-width: 34px;
+  padding: 0 2px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
+.scroll-view {
+  padding-right: 20px;
+}
+
+.scroll-track {
+  width: 16px;
+  border-radius: 8px;
+}
+
+.scroll-thumb {
+  left: 2px;
+  right: 2px;
+  border-radius: 6px;
+}

@@ -2,7 +2,7 @@
 // 내용은 일반 overflow 스크롤(휠·키보드·터치 그대로), 막대만 포인터 이벤트로 직접 처리한다.
 import { type ReactNode, type PointerEvent, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
-const MIN_THUMB = 20
+const MIN_THUMB = 28
 
 export default function ScrollArea({ className, children }: { className?: string; children: ReactNode }) {
   const viewRef = useRef<HTMLDivElement>(null)
