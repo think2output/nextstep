@@ -53,7 +53,7 @@
 - 실행해 보지 않은 명령·결과를 "확인됨"으로 쓰지 않는다. 사용자 보고와 자동 기록을 구분해 적는다.
 
 ## 작업할 때마다 남길 기록
-- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-024부터).
+- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-025부터).
 - AI가 틀렸다가 고친 것 → docs/ai-log.md.
 - 결정 → docs/decisions.md (D-030부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
 - 시험 결과 → docs/test-report.md, 작은 창 실기 → docs/gate-01.md.
