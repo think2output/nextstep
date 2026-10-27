@@ -101,3 +101,25 @@ button:disabled {
   color: var(--muted);
   font-size: 12px;
 }
+
+/* 아주 작은 창: 여백을 줄이고 줄바꿈을 줄인다. 버튼 높이 44px은 유지 (PRD 8.3) */
+@media (max-width: 279px), (max-height: 219px) {
+  .pip {
+    padding: 6px;
+  }
+
+  .pip-q {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .pip-buttons button {
+    padding: 0 6px;
+  }
+
+  .pip-count,
+  .pip-meta {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+}

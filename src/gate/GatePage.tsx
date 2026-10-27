@@ -4,6 +4,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { PIP_SIZE_DEFAULT, PIP_SIZE_QUESTION, usePip } from '../pip/usePip'
 
+// 더 작은 크기는 기본값 변경 검토용 (PRD 8.2 기본 340×280). 브라우저가 최소 크기로 보정할 수 있다.
+const SIZE_OPTIONS = [
+  { label: '기본', ...PIP_SIZE_DEFAULT },
+  { label: '질문용', ...PIP_SIZE_QUESTION },
+  { label: '작게', width: 280, height: 200 },
+  { label: '더 작게', width: 240, height: 160 },
+  { label: '최소 시험', width: 200, height: 120 },
+]
+
 const AUTO_REQUEST_MS = 10_000
 const TICK_MS = 1_000
 
@@ -129,13 +138,18 @@ export default function GatePage() {
         </p>
         {error && <p className="error">열기 실패: {error}</p>}
         <div className="row">
-          <button type="button" disabled={status !== 'closed' && status !== 'failed'} onClick={() => open(PIP_SIZE_DEFAULT)}>
-            작은 창 띄우기 (340×280)
-          </button>
-          <button type="button" disabled={status !== 'closed' && status !== 'failed'} onClick={() => open(PIP_SIZE_QUESTION)}>
-            큰 작은 창 띄우기 (380×480)
-          </button>
+          {SIZE_OPTIONS.map((s) => (
+            <button
+              key={s.label}
+              type="button"
+              disabled={status !== 'closed' && status !== 'failed'}
+              onClick={() => open({ width: s.width, height: s.height })}
+            >
+              {s.label} ({s.width}×{s.height})
+            </button>
+          ))}
         </div>
+        <p className="hint">작은 창 모서리를 끌어서 크기를 바꿀 수도 있어요. 실제 크기는 작은 창 맨 아래에 나와요.</p>
         {status === 'open' && <p className="hint">작은 창을 사용하는 동안 이 탭은 닫지 마세요.</p>}
       </section>
 
