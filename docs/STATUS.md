@@ -76,13 +76,14 @@
 | 항목 | 필수 | 상태 |
 |---|---|---|
 | GitHub 주소 (코드 + README 실행 방법) | 필수 | https://github.com/think2output/nextstep 공개. README 실행법·배포 절차 작성 |
-| 발표 자료 (PPT/PDF) | 필수 | 미착수 |
+| 발표 자료 (PPT/PDF) | 필수 | 재료·프롬프트 준비(docs/presentation/). 사용자가 claude.ai Slides로 제작 예정 |
 | 배포 주소 | 택1 이상 | https://nextstep-smoky.vercel.app |
 | 시연 영상 1~3분 (핵심 흐름 + 방어 장면) | 택1 이상 | 미착수 |
 
 ## 작업 기록
 
 ### 2026-10-28
+- 발표 준비(D-048): docs/presentation/(재료 묶음·디자인 값·Slides/Motion 프롬프트·화면 사진 38장), tests/e2e/presentation-shots.mjs. 과제 직군 표 확인(PM=PO 줄), 발표 4~5분.
 - 비교 시험 계획 보강: 한 명씩 입장하는 이유·동시 입장 시 대안, 인원이 2~3명일 때 진행 방법.
 - 제출 요건 확인(발표 6개 순서, 사용자 직군 PM). 사용자 비교 시험 계획(docs/user-test-plan.md, D-047)과 B 응답 시간 뽑기 스크립트(npm run usertest:times) 추가.
 - 프롬프트 모음을 다듬은 문장으로 바꾸고, 공개 기록(모든 과거 커밋)도 다시 써서 강제 푸시. 커밋 번호 전부 바뀜. 옛 커밋은 번호를 직접 넣으면 GitHub에서 아직 열림(지우려면 GitHub 지원 요청 또는 저장소 새로 만들기).
