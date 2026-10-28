@@ -112,6 +112,8 @@ React 19 + TypeScript + Vite / Supabase(PostgreSQL private 스키마, 익명 Aut
 
 | 문서 | 내용 |
 |---|---|
+| `docs/work-summary.md` | 지금까지 한 일·검증 결과·AI 수정 사례 요약 |
+| `docs/presentation-plan.md` | 발표 자료·GIF 계획 (후속) |
 | `docs/PRD.md` | 요구사항 원천 (v1.11) |
 | `docs/STATUS.md` | 진행 상태·다음 작업 |
 | `docs/HANDOFF.md` | 다음 작업자(에이전트)용 시작 프롬프트 |
