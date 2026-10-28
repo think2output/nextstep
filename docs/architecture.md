@@ -41,6 +41,7 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 | `src/pip/useSideWindow.ts` | 옆 질문 보기 창(보통 팝업). 작은 창 기준 빈 쪽 배치, 원래 탭이 portal로 그림 (D-042) |
 | `src/room/QuestionDetail.tsx`, `src/room/useQuestionActions.ts` | 옆 창 질문 원문·조작, 공감·답변 완료·숨기기 공통 로직 |
 | `src/pages/RoomReport.tsx` | 강사 원래 탭 수업 리포트(get_round_history 50개 집계, D-044) |
+| `scripts/user-test-times.mjs` | 사용자 비교 시험 B 응답 시간(서버 시각, 참가자 P1~ 입장 순서), npm run usertest:times (D-047) |
 | `scripts/pilot-code.mjs` | 운영자 코드 바꾸기(npm run pilot:new / pilot:set), 서버엔 bcrypt 해시 (D-046) |
 | `src/gate/` | GATE-01 시험 전용(공개 채널, `?role=`) — 제품 코드에서 재사용 금지 |
 | `supabase/migrations/` | 아래 3장 |

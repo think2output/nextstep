@@ -92,6 +92,7 @@ npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (n
 node tests/e2e/latency.mjs 20   # 강사↔학생 반영 지연 중앙값·P95 (BASE_URL 지정 가능)
 npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
 
+npm run usertest:times -- <참여코드>   # 사용자 비교 시험 B 응답 시간 (시험 후 24시간 안)
 npm run pilot:set / pilot:new   # 운영자 코드 바꾸기 (사용자가 자기 터미널에서. 에이전트가 대신 실행하면 코드가 출력·변경됨)
 
 npx supabase db push --linked --dry-run   # 적용 예정 migration 확인
