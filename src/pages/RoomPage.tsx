@@ -42,6 +42,8 @@ export default function RoomPage({ roomId }: { roomId: string }) {
   const [ending, setEnding] = useState(false)
   const [endError, setEndError] = useState<string | null>(null)
   const [soundOn, setSoundOn] = useState(readSound)
+  // 학생은 작은 창이 기본이라 웹 화면은 원할 때만 펼친다 (사용자 피드백, PRD v1.5 8.2)
+  const [showWeb, setShowWeb] = useState(false)
   const nudge = useNudge(store, soundOn)
   const toggleSound = (on: boolean) => {
     setSoundOn(on)
@@ -101,6 +103,7 @@ export default function RoomPage({ roomId }: { roomId: string }) {
       draft={draft}
       nudge={nudge}
       setDraft={setDraft}
+      inPip={pip.status === 'open'}
     />
   )
 
@@ -122,6 +125,24 @@ export default function RoomPage({ roomId }: { roomId: string }) {
 
       {isHost && joinCode && !ended && <HostShare joinCode={joinCode} />}
 
+      {!isHost && !ended && pip.status !== 'unsupported' && pip.status !== 'open' && (
+        <section className="section pip-start" aria-labelledby="pip-start-title">
+          <h2 id="pip-start-title" className="pip-start-title">
+            👇 {pip.status === 'closed' && pip.wasOpened ? '작은 창을 다시 띄워주세요' : '먼저 작은 창을 띄워주세요'}
+          </h2>
+          <p className="pip-start-desc">수업 중 응답·질문은 VS Code·젭 위에 떠 있는 작은 창에서 해요.</p>
+          {pip.error && <p className="error-text">작은 창을 열지 못했어요. 아래 ‘작은 창 없이 여기서 쓰기’를 사용해주세요.</p>}
+          <button
+            type="button"
+            className="btn btn-primary btn-block"
+            disabled={pip.status === 'opening'}
+            onClick={() => void pip.open(compact ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)}
+          >
+            {pip.status === 'closed' && pip.wasOpened ? '작은 창 다시 열기' : '작은 창 띄우기'}
+          </button>
+        </section>
+      )}
+
       <section className="section stack">
         <h2 className="section-title">작은 창</h2>
         {pip.status === 'unsupported' ? (
@@ -130,11 +151,11 @@ export default function RoomPage({ roomId }: { roomId: string }) {
           </p>
         ) : pip.status === 'open' ? (
           <p className="notice">작은 창을 사용하는 동안 이 탭은 닫지 마세요.</p>
-        ) : (
-          <p className="muted">VS Code·젭 위에 떠 있는 작은 창에서 응답{isHost ? '을 확인' : '하고 질문'}할 수 있어요.</p>
-        )}
-        {pip.error && <p className="error-text">작은 창을 열지 못했어요. 아래 화면을 사용해주세요.</p>}
-        {pip.status !== 'unsupported' && pip.status !== 'open' && (
+        ) : isHost ? (
+          <p className="muted">VS Code·젭 위에 떠 있는 작은 창에서 응답을 확인할 수 있어요.</p>
+        ) : null}
+        {isHost && pip.error && <p className="error-text">작은 창을 열지 못했어요. 아래 화면을 사용해주세요.</p>}
+        {isHost && pip.status !== 'unsupported' && pip.status !== 'open' && (
           <button
             type="button"
             className="btn btn-primary btn-block"
@@ -144,7 +165,14 @@ export default function RoomPage({ roomId }: { roomId: string }) {
             {pip.status === 'closed' && pip.wasOpened ? '작은 창 다시 열기' : '작은 창 띄우기'}
           </button>
         )}
-        {pip.status !== 'open' && <div className="pip-frame">{view}</div>}
+        {!isHost && pip.status !== 'open' && pip.status !== 'unsupported' && !ended && (
+          <button type="button" className="text-link pip-web-toggle" aria-expanded={showWeb} onClick={() => setShowWeb(!showWeb)}>
+            작은 창 없이 여기서 쓰기 {showWeb ? '▾' : '▸'}
+          </button>
+        )}
+        {pip.status !== 'open' && (isHost || showWeb || ended || pip.status === 'unsupported') && (
+          <div className="pip-frame">{view}</div>
+        )}
         {!isHost && (
           <label className="switch-row">
             <input type="checkbox" checked={soundOn} onChange={(e) => toggleSound(e.target.checked)} />

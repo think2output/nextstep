@@ -8,7 +8,7 @@
 - **로컬에서 핵심 흐름이 끝까지 동작**: 강사 방 만들기 → 학생 입장 → 작은 창(PiP) → 확인 요청·응답·집계(%·과반) → 재촉하기 → 익명 질문·🙋·답변 완료·숨김 → 방 종료.
 - 서버(Supabase): migration 6개 원격 적용, 공개 RPC 14개, private Realtime 채널, 매시 정리 작업.
 - 시험: `npm test`(DB, 35개 통과), `npm run smoke`(헤드리스 Chrome 강사 1·학생 2, 11단계 통과).
-- PRD는 **v1.4** (작은 창 크기·질문 탭·재촉하기 등 사용자 결정 반영).
+- PRD는 **v1.5** (v1.4 + 배포 후 실기 피드백: 전송 완료 표시, 강사 종료 화면 압축, 학생 입장 안내, −/＋/↗ 버튼).
 - **배포됨**: https://nextstep-smoky.vercel.app (Vercel, main push마다 자동 배포, D-031). 배포 주소 smoke 5회 중 4회 통과·1회 4단계 5초 초과(test-report).
 - `/gate`는 개발 모드에서만 열림(D-030). 실제 PiP 창에서의 최신 화면은 사용자가 수동 확인 중.
 
@@ -16,7 +16,7 @@
 
 1. ~~배포~~ 완료 (2026-10-28). Auth `site_url`·redirect 갱신, README 배포 절차, AT59 번들 검사 완료.
 2. ~~Realtime 공개 채널 끄기~~ 완료 (2026-10-28, 사용자). npm test 35개 통과, 공개 채널 PrivateOnly 거절 확인.
-3. **배포 주소 실기 시험** — 다른 기기에서 학생 입장, GATE-01 G5·G6·G7 → `docs/gate-01.md`. 배포 smoke 1회 실패(학생 요청 수신 5초 초과) 원인 확인(AT47·AT48과 함께).
+3. **배포 주소 실기 시험** — G5·G7 통과(사용자 보고). 남음: **G6 10분**, PRD v1.5 화면을 실제 작은 창에서 확인(특히 ↗가 원래 탭을 앞으로 가져오는지, D-035). 배포 smoke 1회 실패(학생 요청 수신 5초 초과) 원인 확인(AT47·AT48과 함께).
 4. **남은 인수 테스트**: AT06(31명 정원), AT56(30명+강사 60분), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계), AT54(크기), AT55(키보드·대비), AT59 Network 탭 확인, AT60(README만으로 재현). 결과는 `docs/test-report.md`.
 5. **알려진 빈틈** (아래 표) 정리.
 6. DEV09 사용자 비교 테스트(PRD 20장), DEV10 README·발표 자료·시연 영상.
@@ -25,7 +25,7 @@
 
 | 작업 | 상태 | 완료 증거 / 비고 |
 |---|---|---|
-| DEV01 PiP 기술 검증 | 대부분 완료 | `docs/gate-01.md`. 남음: G5(다른 기기 화면 공유), G6 10분, G7 새로고침 |
+| DEV01 PiP 기술 검증 | 대부분 완료 | `docs/gate-01.md`. G5·G7 통과(사용자 보고). 남음: G6 10분, G8 |
 | DEV02 데이터 모델·권한 | 완료 | `supabase/migrations/*`, `tests/db` |
 | DEV03 방 생성·참여·익명 세션 | 완료 | StartPage·RoomPage, smoke |
 | DEV04 snapshot·Realtime·재연결 | 1차 완료 | `src/room/useRoom.ts`. 재연결 실제 시험(AT48) 남음 |
@@ -69,6 +69,7 @@
 ## 작업 기록
 
 ### 2026-10-28
+- 실기 피드백 반영(PRD v1.5, D-032~D-035): 학생 “✓ 전송 완료” 잠깐 표시·버튼 한 줄, 강사 종료된 확인 화면 스크롤 제거(줄 찌그러짐 버그 수정), 학생 입장 안내 상자·웹 화면 접기, 상단 −/＋/↗. smoke 학생 단계 갱신, localhost 11단계 통과.
 - Realtime 공개 채널 꺼짐(사용자), npm test 35 통과, 공개 채널 거절 확인.
 - 배포: Vercel 프로젝트 nextstep(GitHub 연결), 환경변수 VITE_ 2개만, `.vercelignore`로 .env* 업로드 제외, Supabase Auth site_url·redirect에 배포 주소 추가(config push 차이 2항목 확인 후 적용). AT59 번들 검사 부분 통과. /gate 개발 모드 전용(D-030).
 - 저장소 골격(CLAUDE.md, AGENTS.md, docs/*), 원본 PRD를 `docs/PRD.md`로 이동, GitHub 공개 저장소 생성.

@@ -17,9 +17,11 @@ type Props = {
   draft: string
   setDraft: (value: string) => void
   nudge: NudgeState
+  // 실제 작은 창(PiP) 안에 그릴 때만 true. 원래 탭 미리보기에는 '탭으로 돌아가기'가 필요 없다
+  inPip: boolean
 }
 
-export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft, nudge }: Props) {
+export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft, nudge, inPip }: Props) {
   const snap = store.snap!
   const isHost = snap.my_role === 'host'
   const activeId = snap.active_round?.id ?? null
@@ -36,6 +38,9 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
     const win = e.currentTarget.ownerDocument.defaultView
     if (win && win !== window) resizePip(win, next ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
   }
+
+  // 사용자가 누를 때만 원래 탭으로 돌아간다 (PIP-04: 자동 이동 금지). 작은 창은 닫지 않는다
+  const backToTab = () => window.focus()
 
   const conn =
     store.conn === 'live' ? (
@@ -82,8 +87,13 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
           title={compact ? '기본 크기로' : '더 작게'}
           onClick={toggleCompact}
         >
-          {compact ? '⤢' : '⤡'}
+          {compact ? '＋' : '−'}
         </button>
+        {inPip && (
+          <button type="button" className="pv-icon" aria-label="원래 탭으로 돌아가기" title="원래 탭으로 돌아가기" onClick={backToTab}>
+            ↗
+          </button>
+        )}
       </div>
 
       {snap.room.status === 'ended' && <p className="pv-ended">종료된 방이에요 · 읽기만 가능</p>}

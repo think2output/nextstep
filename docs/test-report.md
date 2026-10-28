@@ -138,3 +138,17 @@
 사용자가 Supabase 대시보드에서 "Allow public access to channels"를 껐다(사용자 보고).
 - `npm test` 35개 모두 통과(Realtime 수신 권한 시험 포함).
 - 공개 채널 구독 시도(로그인 없이 `private` 아닌 채널): `CHANNEL_ERROR PrivateOnly: This project only allows private channels` — 차단 확인(자동).
+
+### 작은 창 넘침 측정 (2026-10-28, PRD v1.5 변경 후)
+
+방법: 헤드리스 Chrome에서 원래 탭 미리보기 틀을 작은 창 크기로 바꾸고 `html.pip-doc`(실제 작은 창 규칙)를 붙인 뒤 응답 탭 본문의 scrollHeight와 높이를 비교. 측정 스크립트는 저장소에 넣지 않음(일회성). 실제 PiP 창이 아니라 근사치다.
+
+| 상태 | 240×160 | 200×120 |
+|---|---|---|
+| 강사 요청 없음 | 0px | 0px |
+| 강사 진행 중 | 0px | 0px (변경 전 26px, 과반 줄 숨김) |
+| 강사 종료된 확인 + 다음 버튼 | 0px (변경 전 36px — 제목·연결 줄이 찌그러져 숨어 있었음) | 0px |
+| 학생 요청 수신 | 0px | 0px |
+| 학생 선택 후 / 전송 완료 표시 | 0px | 0px (긴 선택지는 짧은 말) |
+
+같은 변경 후 `npm run smoke`(localhost) 11단계 통과. 실제 PiP 창에서의 모양·↗(원래 탭으로) 동작은 사용자 실기 확인 필요.

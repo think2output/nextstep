@@ -1,16 +1,19 @@
 // 작은 창 응답 탭 (PRD 8.4 학생, 8.5 강사, RESP-04 전송 UI)
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { newActionId } from '../lib/rpc'
 import {
   ROUND_TEXT,
   ROUND_TYPES,
   errorText,
+  textLength,
   type Choice,
   type HostRound,
   type RoundType,
   type StudentRound,
 } from '../shared/domain'
 import type { RoomStore } from './useRoom'
+
+const TOAST_MS = 1600
 
 type Pending = { roundId: string; choice: Choice; actionId: string; base: number; state: 'sending' | 'unknown' }
 
@@ -19,6 +22,13 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
   const [rawPending, setPending] = useState<Pending | null>(null)
   const [confirmed, setConfirmed] = useState<{ roundId: string; choice: Choice; version: number } | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  // 서버 승인 직후 잠깐 보이는 '전송 완료' (사용자 피드백, PRD v1.5 8.4). 승인 전에는 띄우지 않는다 (RESP-04-2)
+  const [toast, setToast] = useState(0)
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(0), TOAST_MS)
+    return () => clearTimeout(t)
+  }, [toast])
 
   // 새 회차에는 이전 전송 상태를 가져가지 않는다 (RESP-03)
   const roundId = round?.id ?? null
@@ -27,6 +37,7 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
     setStateRound(roundId)
     setPending(null)
     setMessage(null)
+    setToast(0)
   }
 
   const serverVersion = round?.my_response_version ?? 0
@@ -85,6 +96,7 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
     if (res.ok) {
       setConfirmed({ roundId: next.roundId, choice: res.data.my_choice, version: res.data.version })
       setPending(null)
+      setToast(Date.now())
     } else if (res.error.code === 'TIMEOUT' || res.error.code === 'NETWORK') {
       setPending({ ...next, state: 'unknown' })
     } else {
@@ -95,6 +107,8 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
 
   const shown = pending?.choice ?? myChoice
   const label = (c: Choice) => (c === 'yes' ? text.yes : text.no)
+  const short = (c: Choice) => (c === 'yes' ? text.yesShort : text.noShort)
+  const LONG_LABEL = 7 // 200×120에서 한 줄에 들어가는 글자 수 (실측)
 
   let status
   if (pending?.state === 'sending') {
@@ -111,7 +125,8 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
   } else if (message) {
     status = <p className="pv-status pv-status-warn" aria-live="polite">{message}</p>
   } else if (myChoice) {
-    status = <p className="pv-status pv-status-ok" aria-live="polite">✓ ‘{label(myChoice)}’로 전달했어요</p>
+    // 화면에는 버튼 색·✓와 잠깐 뜨는 '전송 완료'로 보여주고, 화면 읽기 프로그램에는 문장으로 알린다
+    status = <p className="sr-only" aria-live="polite">‘{label(myChoice)}’로 전달했어요</p>
   } else if ((round.nudge_count ?? 0) > 0) {
     status = <p className="pv-status pv-status-alert" role="alert">강사님이 응답을 기다리고 있어요</p>
   } else {
@@ -126,17 +141,24 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
           <button
             key={c}
             type="button"
-            className="pv-choice"
+            // 보내는 중(선택 예정)은 연한 파랑, 서버 승인 후 진한 파랑 + 모서리 ✓ (RESP-04-1·2). 글자는 한 줄 유지
+            className={`pv-choice${shown === c && pending ? ' pv-choice-pending' : ''}${textLength(label(c)) > LONG_LABEL ? ' pv-choice-long' : ''}`}
+            aria-label={label(c)}
+            title={label(c)}
             aria-pressed={shown === c}
             disabled={!store.canWrite || pending?.state === 'sending'}
             onClick={() => void send(c)}
           >
-            {shown === c && '✓ '}
-            {label(c)}
+            <span className="pv-label-full">{label(c)}</span>
+            <span className="pv-label-short">{short(c)}</span>
+            {shown === c && !pending && <span className="pv-choice-check" aria-hidden="true">✓</span>}
           </button>
         ))}
       </div>
       {status}
+      {toast > 0 && (
+        <span key={toast} className="pv-toast" aria-hidden="true">✓ 전송 완료</span>
+      )}
     </>
   )
 }
@@ -196,15 +218,26 @@ export function HostAnswer({ store }: { store: RoomStore }) {
     <>
       {last ? (
         <>
-          <p className="pv-q pv-hide-compact" title="종료된 확인">종료된 {ROUND_TEXT[last.type].label}</p>
+          {/* 연결 인원을 제목 줄에 붙여 지난 결과와 다음 확인 버튼이 240×160 안에 함께 들어가게 (사용자 피드백) */}
+          <div className="pv-q-row">
+            <p className="pv-q pv-hide-compact" title="종료된 확인">종료된 {ROUND_TEXT[last.type].label}</p>
+            <span
+              className="pv-meta pv-meta-inline"
+              title={connected > 0 ? `지금 연결된 수강생 ${connected}명` : '연결된 수강생이 없어요. 코드를 공유해주세요.'}
+            >
+              연결 {connected}명
+            </span>
+          </div>
           <div className="pv-hide-compact">
             <RoundStats round={last} />
           </div>
         </>
       ) : (
-        <p className="pv-q">보낼 확인을 고르세요</p>
+        <>
+          <p className="pv-q">보낼 확인을 고르세요</p>
+          <p className="pv-meta">{connected > 0 ? `지금 연결된 수강생 ${connected}명` : '연결된 수강생이 없어요. 코드를 공유해주세요.'}</p>
+        </>
       )}
-      <p className="pv-meta">{connected > 0 ? `지금 연결된 수강생 ${connected}명` : '연결된 수강생이 없어요. 코드를 공유해주세요.'}</p>
       <div className="pv-actions">
         {ROUND_TYPES.map((type: RoundType) => (
           <button

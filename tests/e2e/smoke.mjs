@@ -48,8 +48,11 @@ try {
   await student.goto(`${BASE}/join?code=${code}`)
   await student.getByRole('button', { name: '입장하기' }).click()
   await student.waitForURL(/\/room\//)
+  // 학생은 작은 창 띄우기 안내가 먼저, 웹 화면은 펼쳐야 보인다 (PRD v1.5 8.2)
+  await student.getByText('먼저 작은 창을 띄워주세요').waitFor()
+  await student.getByRole('button', { name: /작은 창 없이 여기서 쓰기/ }).click()
   await student.getByText('현재 응답 요청이 없어요').waitFor()
-  step('학생 입장, 요청 없음 안내 표시')
+  step('학생 입장, 작은 창 안내 → 웹 화면 펼침, 요청 없음 안내 표시')
 
   // 강사: 연결된 학생 확인 후 준비 확인 보내기
   await host.getByText('지금 연결된 수강생 1명').waitFor({ timeout: 15_000 })
@@ -60,8 +63,9 @@ try {
   // 학생: 요청 수신 → 응답
   await student.getByText('실습할 준비가 됐나요?').waitFor({ timeout: 5_000 })
   await student.getByRole('button', { name: '준비됐어요' }).click()
-  await student.getByText('‘준비됐어요’로 전달했어요').waitFor()
-  step('학생 응답 전달 확인 표시')
+  await student.locator('.pv-toast', { hasText: '전송 완료' }).waitFor()
+  await student.getByText('‘준비됐어요’로 전달했어요').waitFor({ state: 'attached' })
+  step('학생 응답 승인 후 ‘전송 완료’ 표시')
 
   // 강사: 집계 반영 (대상 1명 중 1명 → 100%, 과반)
   await host.getByText('✓ 과반이 ‘준비됨’ (100%)').waitFor({ timeout: 5_000 })
@@ -86,6 +90,7 @@ try {
   await student2.goto(`${BASE}/join?code=${code}`)
   await student2.getByRole('button', { name: '입장하기' }).click()
   await student2.waitForURL(/\/room\//)
+  await student2.getByRole('button', { name: /작은 창 없이 여기서 쓰기/ }).click()
   await student2.getByRole('button', { name: /^질문/ }).click()
   await student2.getByRole('button', { name: '저도 궁금해요 0' }).click()
   await student2.getByRole('button', { name: '저도 궁금해요 1' }).waitFor({ timeout: 5_000 })

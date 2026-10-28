@@ -1184,3 +1184,168 @@ button:disabled {
 .history-item .pv-majority {
   margin: 8px 2px 10px;
 }
+
+/* ═════════ 실기 시험 후 사용자 피드백 (2026-10-28, PRD v1.5) ═════════ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 학생 입장 직후: 작은 창 띄우기를 가장 먼저 안내 (자동 열기는 하지 않음, PIP-01) */
+.pip-start {
+  padding: 20px;
+  border: 2px solid var(--blue-500);
+  border-radius: var(--radius-l);
+  background: var(--blue-50);
+}
+
+.pip-start-title {
+  margin: 0 0 6px;
+  font-size: var(--fs-sub);
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.pip-start-desc {
+  margin: 0 0 14px;
+  color: var(--text-sub);
+  font-size: var(--fs-small);
+}
+
+.pip-start .error-text {
+  margin-bottom: 12px;
+}
+
+.pip-web-toggle {
+  align-self: flex-start;
+}
+
+/* 학생 선택 버튼: 글자는 한 줄, ✓는 모서리 표시 */
+.pv-choice {
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pv-choice-pending[aria-pressed='true'] {
+  background: var(--blue-50);
+  color: var(--blue-700);
+  box-shadow: inset 0 0 0 1px var(--blue-500);
+}
+
+.pv-choice-check {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.pv-compact .pv-choice {
+  padding: 2px 4px;
+  font-size: var(--pip-fs-list);
+}
+
+/* 서버 승인 직후 잠깐 뜨는 '전송 완료'. 포커스·클릭을 가져가지 않는다 */
+.pv-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 3;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--grey-800);
+  color: #fff;
+  font-size: var(--pip-fs-meta);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+  animation: pv-toast 1.6s ease-out forwards;
+}
+
+@keyframes pv-toast {
+  0% { opacity: 0; transform: translate(-50%, 4px); }
+  12% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-toast {
+    animation: none;
+  }
+}
+
+/* 작은 창 강사 집계 숫자를 줄여 종료 후 화면(지난 결과 + 다음 확인 버튼)이 스크롤 없이 들어가게 */
+.pip-doc .pv-stat {
+  padding: 2px;
+}
+
+.pip-doc .pv-stat-num {
+  font-size: 13px;
+}
+
+.pip-doc .pv-meter {
+  margin-top: 4px;
+}
+
+.pip-doc .pv-majority {
+  margin: 2px;
+}
+
+.pip-doc .pv-meta {
+  margin: 2px;
+}
+
+/* 응답 탭 줄이 공간 부족으로 높이 0까지 찌그러져 사라지지 않게 (넘치면 스크롤로 드러나게) */
+.pv-scroll-body > * {
+  flex-shrink: 0;
+}
+
+.pv-meta-inline {
+  flex: none;
+  margin: 0 2px;
+}
+
+/* 더 작게(200×120): 진행 중 집계는 숫자·막대만 (PRD 8.2 보조 정보 숨김) */
+.pv-compact .pv-majority {
+  display: none;
+}
+
+.pip-doc .pv-q-row {
+  margin-bottom: 2px;
+}
+
+.pip-doc .pv-stat-label {
+  line-height: 1.25;
+}
+
+.pip-doc .pv-majority {
+  line-height: 1.3;
+}
+
+.pip-doc .pv-actions .pv-action {
+  min-height: 28px;
+}
+
+/* 더 작게(200×120)에서 한 줄에 안 들어가는 긴 선택지는 짧은 말로 (예: 다시 설명해주세요 → 다시 설명) */
+.pv-label-short {
+  display: none;
+}
+
+.pv-compact .pv-choice-long .pv-label-full {
+  display: none;
+}
+
+.pv-compact .pv-choice-long .pv-label-short {
+  display: inline;
+}
