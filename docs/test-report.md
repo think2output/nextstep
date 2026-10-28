@@ -160,4 +160,5 @@
 | 1회 (자동 배포 전환 직후) | 실패: 학생 페이지가 이전 배포의 JS 파일을 요청 → 없는 파일에 index.html(200, text/html)이 응답돼 모듈 로드 실패 |
 | 2회 | 11단계 모두 통과 |
 
-조치: `vercel.json` rewrite에서 `/assets/`를 빼서 없는 정적 파일은 404로 응답하게 함(배포 후 확인 결과는 아래 줄에 추가).
+조치: `vercel.json` rewrite에서 `/assets/`를 빼서 없는 정적 파일은 404로 응답하게 함
+배포 후 확인: 없는 `/assets/nope-123.js` → 404, `/`·`/join?code=…`·`/room/<id>`·`/gate` → 200, smoke 1회 모든 단계 통과.
