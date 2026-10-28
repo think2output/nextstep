@@ -1413,3 +1413,12 @@ button:disabled {
   flex: 1;
   margin-left: 2px;
 }
+
+/* 선택된 버튼에 마우스를 올려도 회색으로 바뀌지 않게 (일반 버튼 hover가 선택 색을 덮어씀) */
+.pv-choice[aria-pressed='true']:hover:not(:disabled) {
+  background: var(--blue-600);
+}
+
+.pv-choice-pending[aria-pressed='true']:hover:not(:disabled) {
+  background: var(--blue-50);
+}
