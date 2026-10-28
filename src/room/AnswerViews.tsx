@@ -188,7 +188,7 @@ export function HostAnswer({ store }: { store: RoomStore }) {
           <p className="pv-q pv-hide-pip" title={t.question}>{t.label} 진행 중</p>
           {/* 대상 중 몇 명이 응답했는지 (사용자 피드백, D-040). 분모는 요청 시작 시 고정 (RESP-02) */}
           <span className="pv-answered" title={`${t.label}: 대상 ${active.target_count}명 중 ${active.yes_count + active.no_count}명 응답`}>
-            <b>{active.yes_count + active.no_count}/{active.target_count}</b>명 응답
+            {active.yes_count + active.no_count}/{active.target_count}명 응답
           </span>
           <button
             type="button"

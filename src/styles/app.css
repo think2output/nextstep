@@ -1396,12 +1396,6 @@ button:disabled {
   font-size: var(--pip-fs-meta);
   color: var(--text-sub);
   white-space: nowrap;
-}
-
-.pv-answered b {
-  font-size: var(--pip-fs-q);
-  font-weight: 800;
-  color: var(--text-strong);
   font-variant-numeric: tabular-nums;
 }
 
