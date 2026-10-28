@@ -27,7 +27,7 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 |---|---|
 | `src/App.tsx`, `src/app/router.ts` | 라우팅: `/` 시작, `/join?code=` 참여 링크, `/room/<uuid>` 방, `/gate` GATE-01 시험(lazy, 개발 모드에서만 D-030) |
 | `src/pages/StartPage.tsx` | 참여 코드 입장, 강사 방 만들기(파일럿 코드) |
-| `src/pages/RoomPage.tsx` | 방 원래 탭: 참여 코드 공유, 작은 창 열기, 웹 미리보기, 지난 확인 기록, 알림음 설정, 방 종료 |
+| `src/pages/RoomPage.tsx` | 방 원래 탭: 참여 코드 공유, 작은 창 열기, 웹 미리보기, 수업 리포트(RoomReport), 알림음 설정, 방 종료 |
 | `src/room/useRoom.ts` | snapshot 조회(150ms debounce·최대 500ms), private 채널 구독, 15초 heartbeat, 쓰기 래퍼, 쓰기 잠금 |
 | `src/room/PipView.tsx` | 작은 창 틀: 탭·정렬·연결 표시·크기 전환·재촉 테두리 |
 | `src/room/AnswerViews.tsx` | 학생 응답(전송 중/미확인/다시 보내기), 강사 확인 보내기·집계(RoundStats)·재촉·종료 |
@@ -73,7 +73,7 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 | question_reactions | PK(question_id, member_id), 같은 방 composite FK, 자가 공감 금지 |
 | action_receipts | PK(auth_user_id, action_id), 요청 해시·최초 응답 |
 | pilot_access_limits | 시도 제한 카운터(고정 창) |
-| app_secrets | pilot_code_hash(bcrypt). 운영자가 SQL로 설정 |
+| app_secrets | pilot_code_hash(bcrypt). `npm run pilot:new`/`pilot:set`으로 바꿈 (D-046) |
 
 telemetry(PRD 14)는 아직 없음. 잠금 순서: room → round → question.
 
