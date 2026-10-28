@@ -1422,3 +1422,14 @@ button:disabled {
 .pv-choice-pending[aria-pressed='true']:hover:not(:disabled) {
   background: var(--blue-50);
 }
+
+/* 더 작게(200×120): 학생 상태 줄이 생겨도 높이가 늘지 않게 (클릭 순간 스크롤 방지)
+   - 전송 중·오류 안내는 그동안 질문 문장 자리를 대신 쓴다
+   - 재촉 안내 줄은 숨긴다 (빨간 테두리·응답 탭 점이 이미 알림, PRD 8.2 보조 정보 숨김) */
+.pv-compact .pv-status-alert {
+  display: none;
+}
+
+.pv-compact .pv-body:has(> .pv-status:not(.pv-status-idle):not(.pv-status-alert)) > .pv-q {
+  display: none;
+}
