@@ -1389,3 +1389,33 @@ button:disabled {
   height: 8px;
   margin-top: 6px;
 }
+
+/* 진행 중 제목 줄의 응답 인원 (예: 3/10명 응답). 줄어들지 않고, 대신 제목이 말줄임 */
+.pv-answered {
+  flex: none;
+  font-size: var(--pip-fs-meta);
+  color: var(--text-sub);
+  white-space: nowrap;
+}
+
+.pv-answered b {
+  font-size: var(--pip-fs-q);
+  font-weight: 800;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+
+.pv-compact .pv-q-row {
+  gap: 4px;
+}
+
+.pip-doc .pv-hide-pip {
+  display: none;
+}
+
+/* 제목을 숨긴 작은 창에서는 응답 인원이 왼쪽, 🔔·확인 종료는 오른쪽 */
+.pip-doc .pv-q-row .pv-answered {
+  flex: 1;
+  margin-left: 2px;
+}

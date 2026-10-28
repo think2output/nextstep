@@ -184,7 +184,12 @@ export function HostAnswer({ store }: { store: RoomStore }) {
       <>
         {/* 확인 종료 버튼을 제목 줄에 두어 240×160 안에 집계·막대·과반이 모두 들어가게 한다 */}
         <div className="pv-q-row">
-          <p className="pv-q" title={t.question}>{t.label} 진행 중</p>
+          {/* 작은 창에서는 공간이 없어 숨기고 응답 인원을 우선한다. 원래 탭 미리보기에는 보인다 */}
+          <p className="pv-q pv-hide-pip" title={t.question}>{t.label} 진행 중</p>
+          {/* 대상 중 몇 명이 응답했는지 (사용자 피드백, D-040). 분모는 요청 시작 시 고정 (RESP-02) */}
+          <span className="pv-answered" title={`${t.label}: 대상 ${active.target_count}명 중 ${active.yes_count + active.no_count}명 응답`}>
+            <b>{active.yes_count + active.no_count}/{active.target_count}</b>명 응답
+          </span>
           <button
             type="button"
             className="pv-action pv-action-inline pv-action-nudge"

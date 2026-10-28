@@ -39,8 +39,13 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
     if (win && win !== window) resizePip(win, next ? PIP_SIZE_COMPACT : PIP_SIZE_DEFAULT)
   }
 
-  // 사용자가 누를 때만 원래 탭으로 돌아간다 (PIP-04: 자동 이동 금지). 작은 창은 닫지 않는다
-  const backToTab = () => window.focus()
+  // 사용자가 누를 때만 원래 탭으로 돌아가고 작은 창은 닫는다 (Chrome '탭으로 돌아가기'와 같게, D-039).
+  // 다시 쓰려면 원래 탭의 '작은 창 다시 열기' (PIP-03, 자동 재열기 없음)
+  const backToTab = (e: MouseEvent<HTMLButtonElement>) => {
+    window.focus()
+    const win = e.currentTarget.ownerDocument.defaultView
+    if (win && win !== window) win.close()
+  }
 
   const conn =
     store.conn === 'live' ? (
@@ -93,7 +98,7 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
           </button>
         )}
         {inPip && (
-          <button type="button" className="pv-icon" aria-label="원래 탭으로 돌아가기" title="원래 탭으로 돌아가기" onClick={backToTab}>
+          <button type="button" className="pv-icon" aria-label="작은 창 닫고 원래 탭으로" title="작은 창 닫고 원래 탭으로" onClick={backToTab}>
             ↗
           </button>
         )}
