@@ -37,7 +37,7 @@
    - README "배포" 절을 실제로 실행한 절차로 채워라.
 2. /gate 시험 페이지 처리와 Realtime 공개 채널 끄기.
    - /gate는 개발 모드에서만 열리도록 처리 완료(D-030).
-   - 그다음 사용자에게 Supabase 대시보드 Realtime 설정에서 "Allow public access"를 꺼 달라고 부탁하고, npm test의 Realtime 시험이 여전히 통과하는지 확인.
+   - Realtime "Allow public access" 꺼짐(사용자, 2026-10-28), npm test 35 통과 확인. 완료.
 3. 배포 주소(https://nextstep-smoky.vercel.app)로 사용자와 실제 시험. 배포 smoke 1회에서 학생 요청 수신이 5초를 넘긴 적이 있다(docs/test-report.md) — AT47·AT48 때 원인 확인: 다른 기기(가능하면 다른 네트워크)에서 학생 입장 → GATE-01 G5(젭 화면 공유), G6(원래 탭 뒤에 두고 10분), G7(원래 탭 새로고침) 결과를 docs/gate-01.md 에 기록.
 4. 남은 인수 테스트를 docs/test-report.md 기준으로 진행: AT06(31명 정원), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계, 필요하면 DB에서 ended_at을 과거로 바꾼 시험 방으로), AT54·AT55(크기·키보드·대비), AT60(README만으로 재현). 30명 60분 부하(AT56)는 스크립트로.
 5. 시간이 남으면 docs/STATUS.md "알려진 빈틈" 표.

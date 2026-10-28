@@ -132,3 +132,9 @@
 같은 날 localhost(dev)·로컬 배포 빌드(`vite preview`)는 각 1회 모두 통과.
 해석(확인 안 됨): 학생 채널 구독이 끝나기 전에 강사 요청 알림이 나갔거나 알림이 늦게 온 경우로 보인다. 앱은 15초 heartbeat의 revision으로 놓친 변경을 복구하도록 설계(PRD 12.2)되어 있으나, 이번 실패에서 15초 안에 복구됐는지는 시험이 5초에서 멈춰 확인하지 못했다. AT47·AT48에서 이어서 확인한다.
 배포 경로 직접 접속: `/`, `/join?code=…`, `/room/<id>`, `/gate` 모두 200 + 앱 HTML (curl). HSTS 헤더 있음. 브라우저 새로고침은 smoke에서 확인하지 않음.
+
+### Realtime 공개 채널 끄기 후 (2026-10-28)
+
+사용자가 Supabase 대시보드에서 "Allow public access to channels"를 껐다(사용자 보고).
+- `npm test` 35개 모두 통과(Realtime 수신 권한 시험 포함).
+- 공개 채널 구독 시도(로그인 없이 `private` 아닌 채널): `CHANNEL_ERROR PrivateOnly: This project only allows private channels` — 차단 확인(자동).

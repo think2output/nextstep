@@ -15,7 +15,7 @@
 ## 다음 작업 (우선순위)
 
 1. ~~배포~~ 완료 (2026-10-28). Auth `site_url`·redirect 갱신, README 배포 절차, AT59 번들 검사 완료.
-2. **Realtime 공개 채널 끄기** — Supabase 대시보드 Realtime 설정 "Allow public access" 끄기(사용자 작업) → `npm test` Realtime 시험 재확인. /gate는 이미 개발 모드 전용(D-030).
+2. ~~Realtime 공개 채널 끄기~~ 완료 (2026-10-28, 사용자). npm test 35개 통과, 공개 채널 PrivateOnly 거절 확인.
 3. **배포 주소 실기 시험** — 다른 기기에서 학생 입장, GATE-01 G5·G6·G7 → `docs/gate-01.md`. 배포 smoke 1회 실패(학생 요청 수신 5초 초과) 원인 확인(AT47·AT48과 함께).
 4. **남은 인수 테스트**: AT06(31명 정원), AT56(30명+강사 60분), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계), AT54(크기), AT55(키보드·대비), AT59 Network 탭 확인, AT60(README만으로 재현). 결과는 `docs/test-report.md`.
 5. **알려진 빈틈** (아래 표) 정리.
@@ -69,6 +69,7 @@
 ## 작업 기록
 
 ### 2026-10-28
+- Realtime 공개 채널 꺼짐(사용자), npm test 35 통과, 공개 채널 거절 확인.
 - 배포: Vercel 프로젝트 nextstep(GitHub 연결), 환경변수 VITE_ 2개만, `.vercelignore`로 .env* 업로드 제외, Supabase Auth site_url·redirect에 배포 주소 추가(config push 차이 2항목 확인 후 적용). AT59 번들 검사 부분 통과. /gate 개발 모드 전용(D-030).
 - 저장소 골격(CLAUDE.md, AGENTS.md, docs/*), 원본 PRD를 `docs/PRD.md`로 이동, GitHub 공개 저장소 생성.
 - GATE-01: Vite+React+TS 시험 페이지(`/gate`). 1차(로컬) G1·G2·G3·G4 통과, 2차(두 창 Supabase Broadcast) 요청 31/31 수신·포커스 안 뺏김. 질문 탭 확장 시 창 위치가 밀리는 문제 발견 → 웹은 PiP 위치 지정 불가 → 크기 고정(D-015).
