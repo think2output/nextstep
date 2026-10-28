@@ -25,7 +25,7 @@ const COPIED_ATTR = 'data-pip-copied'
 
 // 원래 페이지의 스타일을 PiP 문서로 복사한다. PiP는 빈 문서로 열리기 때문.
 // 다시 부르면 이전 복사본을 지우고 새로 복사한다.
-function copyStyles(target: Window) {
+export function copyStyles(target: Window) {
   target.document.head.querySelectorAll(`[${COPIED_ATTR}]`).forEach((el) => el.remove())
   for (const sheet of Array.from(document.styleSheets)) {
     try {
@@ -48,7 +48,7 @@ function copyStyles(target: Window) {
 }
 
 // 원래 페이지 스타일이 바뀌면(개발 중 HMR 등) PiP에도 다시 복사한다. 반환값은 정리 함수.
-function syncStyles(target: Window) {
+export function syncStyles(target: Window) {
   const observer = new MutationObserver(() => copyStyles(target))
   observer.observe(document.head, { childList: true, subtree: true, characterData: true })
   return () => observer.disconnect()

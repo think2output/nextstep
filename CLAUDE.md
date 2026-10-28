@@ -69,7 +69,7 @@ docs/            PRD, 설계, 결정, 테스트 결과, AI 로그, 진행 상태
 src/             프런트엔드 (React + TS + Vite)
 src/gate/        GATE-01 시험 페이지 (시험 전용, 제품 코드 아님)
 src/pip/         PiP 공통 (usePip, ScrollArea)
-src/room/        방 상태(useRoom)·작은 창 화면(PipView, AnswerViews, QuestionView)
+src/room/        방 상태(useRoom)·작은 창 화면(PipView, AnswerViews, QuestionView)·옆 질문 보기(QuestionDetail)
 src/pages/       StartPage, RoomPage
 src/styles/      tokens.css, app.css
 src/shared/      서버·클라이언트 공통 enum·타입·문구

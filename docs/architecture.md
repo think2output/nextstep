@@ -38,6 +38,8 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 | `src/shared/similar.ts` | 비슷한 질문 판정 |
 | `src/pip/` | usePip(열기·스타일 복사·동기화), ScrollArea(직접 만든 스크롤 막대) |
 | `src/styles/` | tokens.css(TDS 참고 토큰), app.css(`.pip-doc`·`.pv`·`.qv`는 작은 창, `.pip-frame`은 웹 미리보기) |
+| `src/pip/useSideWindow.ts` | 옆 질문 보기 창(보통 팝업). 작은 창 기준 빈 쪽 배치, 원래 탭이 portal로 그림 (D-042) |
+| `src/room/QuestionDetail.tsx`, `src/room/useQuestionActions.ts` | 옆 창 질문 원문·조작, 공감·답변 완료·숨기기 공통 로직 |
 | `src/gate/` | GATE-01 시험 전용(공개 채널, `?role=`) — 제품 코드에서 재사용 금지 |
 | `supabase/migrations/` | 아래 3장 |
 | `tests/db/` | 실제 프로젝트에 대고 도는 RPC·권한 테스트(vitest) |

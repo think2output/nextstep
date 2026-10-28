@@ -1,6 +1,7 @@
 // 작은 창 내용 (PRD 8.2~8.7). 원래 탭의 미리보기 틀과 PiP 창에 같은 컴포넌트를 쓴다.
 import { type MouseEvent, useState } from 'react'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, resizePip } from '../pip/usePip'
+import type { QuestionCard } from '../shared/domain'
 import { HostAnswer, StudentAnswer } from './AnswerViews'
 import QuestionView from './QuestionView'
 import type { NudgeState } from './useNudge'
@@ -19,9 +20,10 @@ type Props = {
   nudge: NudgeState
   // 실제 작은 창(PiP) 안에 그릴 때만 true. 원래 탭 미리보기에는 '탭으로 돌아가기'가 필요 없다
   inPip: boolean
+  onOpenQuestion: (q: QuestionCard, e: MouseEvent<HTMLButtonElement>) => void
 }
 
-export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft, nudge, inPip }: Props) {
+export default function PipView({ store, tab, setTab, compact, setCompact, draft, setDraft, nudge, inPip, onOpenQuestion }: Props) {
   const snap = store.snap!
   const isHost = snap.my_role === 'host'
   const activeId = snap.active_round?.id ?? null
@@ -99,7 +101,7 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
         {tab === 'answer' ? (
           isHost ? <HostAnswer store={store} /> : <StudentAnswer store={store} />
         ) : (
-          <QuestionView store={store} draft={draft} setDraft={setDraft} />
+          <QuestionView store={store} draft={draft} setDraft={setDraft} onOpenQuestion={onOpenQuestion} />
         )}
       </div>
     </div>

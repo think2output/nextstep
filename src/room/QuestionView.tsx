@@ -1,25 +1,54 @@
 // 작은 창 질문 탭 (PRD 8.6 v1.2, 8.7, Q-01~Q-04)
-// 학생: 입력칸 하나로 찾기+쓰기, 🙋 공감. 강사: 미답변/완료 전환, 답변 완료·되돌리기·숨기기.
-import { type MouseEvent, useMemo, useState } from 'react'
+// 학생: 입력칸 하나로 찾기+쓰기, +N 공감. 강사: 미답변/완료 전환, 답변 완료·되돌리기. 숨기기는 옆 질문 보기 창에서.
+// 질문 줄을 누르면 옆 창에 원문 (D-042).
+import { type MouseEvent, useEffect, useMemo, useState } from 'react'
 import ScrollArea from '../pip/ScrollArea'
 import { QUESTION_MAX, errorText, textLength, type QuestionCard } from '../shared/domain'
 import { MATCH_THRESHOLD, SEARCH_MIN_CHARS, matchScore } from '../shared/similar'
+import { useQuestionActions } from './useQuestionActions'
 import type { RoomStore } from './useRoom'
 
 type Props = {
   store: RoomStore
   draft: string
   setDraft: (value: string) => void
+  onOpenQuestion: (q: QuestionCard, e: MouseEvent<HTMLButtonElement>) => void
 }
 
-export default function QuestionView({ store, draft, setDraft }: Props) {
+const SORT_TOAST_MS = 1600
+
+// 이모지는 OS마다 모양이 달라 정렬·보내기는 직접 그린 선 아이콘을 쓴다 (D-041)
+const SortIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 13V3M2.5 5.5 5 3l2.5 2.5M11 3v10M8.5 10.5 11 13l2.5-2.5" />
+  </svg>
+)
+
+const MailIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
+    <path d="m2.5 4.5 5.5 4 5.5-4" strokeLinecap="round" />
+  </svg>
+)
+
+export default function QuestionView({ store, draft, setDraft, onOpenQuestion }: Props) {
   const snap = store.snap!
   const isHost = snap.my_role === 'host'
   const cards = snap.questions_page
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [busyIds, setBusyIds] = useState<Set<string>>(new Set())
   const [sending, setSending] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const { busyIds, message, setMessage, react, setStatus } = useQuestionActions(store)
+
+  // 정렬을 바꾸면 무엇으로 바뀌었는지 잠깐 보여준다 (사용자 피드백)
+  const [sortToast, setSortToast] = useState(0)
+  useEffect(() => {
+    if (!sortToast) return
+    const t = setTimeout(() => setSortToast(0), SORT_TOAST_MS)
+    return () => clearTimeout(t)
+  }, [sortToast])
+  const toggleSort = () => {
+    store.setSort(store.sort === 'popular' ? 'latest' : 'popular')
+    setSortToast(Date.now())
+  }
 
   // 보고 있는 순서를 실시간 변경으로 갑자기 바꾸지 않는다 (8.6): 기존 질문 순서는 유지하고 새 질문은 맨 아래에 붙인다.
   // 서버 순서와 달라지면 '목록 업데이트'로 다시 정렬. 필터·정렬이 바뀌면 서버 순서로 새로 시작.
@@ -50,19 +79,6 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
         .map((x) => x.c)
     : ordered
 
-  const withBusy = async (id: string, job: () => Promise<void>) => {
-    setBusyIds((s) => new Set(s).add(id))
-    try {
-      await job()
-    } finally {
-      setBusyIds((s) => {
-        const next = new Set(s)
-        next.delete(id)
-        return next
-      })
-    }
-  }
-
   const submit = async () => {
     if (sending || len < 1 || len > QUESTION_MAX) return
     setSending(true)
@@ -77,40 +93,17 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
     }
   }
 
-  const react = (q: QuestionCard) =>
-    withBusy(q.id, async () => {
-      const res = await store.write('set_reaction', { p_question_id: q.id, p_desired: !q.reacted_by_me })
-      if (!res.ok) setMessage(errorText(res.error.code))
-    })
-
-  const setStatus = (q: QuestionCard, desired: 'pending' | 'answered') =>
-    withBusy(q.id, async () => {
-      const res = await store.write('set_question_status', {
-        p_question_id: q.id, p_desired_status: desired, p_expected_version: q.version,
-      })
-      if (!res.ok) setMessage(errorText(res.error.code))
-    })
-
-  const hide = (q: QuestionCard, e: MouseEvent<HTMLButtonElement>) => {
-    // 작은 창 안에서 확인창을 띄우려면 그 창의 confirm을 쓴다
-    const win = e.currentTarget.ownerDocument.defaultView ?? window
-    if (!win.confirm('이 질문을 숨길까요? 숨기면 되돌릴 수 없고 모든 화면에서 사라져요.')) return
-    void withBusy(q.id, async () => {
-      const res = await store.write('hide_question', { p_question_id: q.id, p_expected_version: q.version })
-      if (!res.ok) setMessage(errorText(res.error.code))
-    })
-  }
-
   // 정렬은 탭 줄이 아니라 질문 탭 첫 줄에 둔다. 탭 줄이 응답·질문에서 같아야 꺾이지 않는다 (사용자 피드백, D-041)
+  const sortLabel = store.sort === 'popular' ? '공감 많은 순' : '최신순'
   const sortButton = (
     <button
       type="button"
       className="pv-icon qv-sort"
-      aria-label={`정렬: ${store.sort === 'popular' ? '저도 궁금해요 많은 순' : '최신순'}. 눌러서 바꾸기`}
-      title={store.sort === 'popular' ? '🙋 많은 순 (눌러서 최신순)' : '최신순 (눌러서 🙋 많은 순)'}
-      onClick={() => store.setSort(store.sort === 'popular' ? 'latest' : 'popular')}
+      aria-label={`정렬: ${sortLabel}. 눌러서 바꾸기`}
+      title={`${sortLabel} (눌러서 ${store.sort === 'popular' ? '최신순' : '공감 많은 순'})`}
+      onClick={toggleSort}
     >
-      {store.sort === 'popular' ? '🙋⇅' : '🕒⇅'}
+      <SortIcon />
     </button>
   )
 
@@ -123,12 +116,11 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
             value={draft}
             rows={1}
             maxLength={QUESTION_MAX * 2}
-            placeholder="익명 질문·찾기 (이름·키 X)"
+            placeholder="익명으로 질문해요"
             aria-label="익명 질문 입력. 쓰는 동안 비슷한 질문이 아래에 표시돼요. 이름·연락처·API 키는 적지 마세요"
             disabled={!store.canWrite}
             onChange={(e) => setDraft(e.target.value)}
           />
-          {sortButton}
           <button
             type="button"
             className="qv-send"
@@ -137,12 +129,13 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
             disabled={!store.canWrite || sending || len < 1 || len > QUESTION_MAX}
             onClick={() => void submit()}
           >
-            {sending ? '…' : '➤'}
+            {sending ? '…' : <MailIcon />}
           </button>
+          {sortButton}
         </div>
       )}
 
-      <div className={`qv-head${isHost || searching ? '' : ' qv-head-empty'}`} aria-live="polite">
+      <div className={`qv-head${isHost || len > 0 ? '' : ' qv-head-empty'}`} aria-live="polite">
         {isHost ? (
           <>
             <span className="qv-seg" role="group" aria-label="질문 필터">
@@ -155,9 +148,12 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
             </span>
             {sortButton}
           </>
-        ) : searching ? (
+        ) : len > 0 ? (
           <>
-            <span>{list.length > 0 ? `비슷한 질문 ${list.length} · 같으면 🙋` : '비슷한 질문 없음 · ➤로 남기기'}</span>
+            {/* 쓰기 시작하면 개인정보 안내, 비슷한 질문이 있으면 그 개수 */}
+            <span className="qv-head-text">
+              {searching && list.length > 0 ? `비슷한 질문 ${list.length} · 같으면 +1` : '이름·연락처·키는 적지 마세요'}
+            </span>
             <span style={{ color: len > QUESTION_MAX ? 'var(--red-500)' : undefined }}>{len}/{QUESTION_MAX}</span>
           </>
         ) : null}
@@ -174,7 +170,7 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
         {list.length === 0 ? (
           <p className="qv-empty">
             {searching
-              ? '같은 질문이 없어요.'
+              ? '같은 질문이 없어요. ✉로 남겨주세요.'
               : store.filter === 'answered'
                 ? '답변 완료된 질문이 없어요.'
                 : isHost
@@ -184,36 +180,23 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
         ) : (
           <ul className="qv-list">
             {list.map((q) => {
-              const open = openId === q.id
               const busy = busyIds.has(q.id)
               return (
                 <li key={q.id} className="qv-item">
                   <button
                     type="button"
-                    className={`qv-line${open ? ' qv-line-open' : ''}`}
-                    aria-expanded={open}
-                    title={`${new Date(q.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })} · ${q.body}`}
-                    onClick={() => setOpenId(open ? null : q.id)}
+                    className="qv-line"
+                    aria-haspopup="dialog"
+                    title={`${new Date(q.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })} · 눌러서 옆 창에서 전체 보기`}
+                    onClick={(e) => onOpenQuestion(q, e)}
                   >
-                    {q.is_mine && <span className="qv-mine-tag">내 질문 · </span>}
+                    {q.is_mine && <span className="qv-me" title="내 질문" aria-label="내 질문">me</span>}
                     {q.body}
                   </button>
 
                   {isHost ? (
                     <>
-                      <span className="qv-mini" aria-label={`저도 궁금해요 ${q.reaction_count}`}>🙋{q.reaction_count}</span>
-                      {open && (
-                        <button
-                          type="button"
-                          className="qv-mini qv-mini-danger"
-                          aria-label="질문 숨기기"
-                          title="숨기기 (되돌릴 수 없음)"
-                          disabled={!store.canWrite || busy}
-                          onClick={(e) => hide(q, e)}
-                        >
-                          숨김
-                        </button>
-                      )}
+                      <span className="qv-mini" aria-label={`저도 궁금해요 ${q.reaction_count}`} title="저도 궁금해요">+{q.reaction_count}</span>
                       <button
                         type="button"
                         className="qv-mini"
@@ -226,7 +209,7 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
                       </button>
                     </>
                   ) : q.is_mine ? (
-                    <span className="qv-mini" aria-label={`내 질문, 저도 궁금해요 ${q.reaction_count}`}>🙋{q.reaction_count}</span>
+                    <span className="qv-mini" aria-label={`내 질문, 저도 궁금해요 ${q.reaction_count}`} title="저도 궁금해요">+{q.reaction_count}</span>
                   ) : (
                     <button
                       type="button"
@@ -237,7 +220,7 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
                       disabled={!store.canWrite || busy || q.status !== 'pending'}
                       onClick={() => void react(q)}
                     >
-                      🙋{q.reaction_count}
+                      +{q.reaction_count}
                     </button>
                   )}
                 </li>
@@ -246,6 +229,9 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
           </ul>
         )}
       </ScrollArea>
+      {sortToast > 0 && (
+        <span key={sortToast} className="pv-toast" aria-hidden="true">{sortLabel}</span>
+      )}
     </>
   )
 }

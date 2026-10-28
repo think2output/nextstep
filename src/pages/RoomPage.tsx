@@ -1,15 +1,17 @@
 // S02~S04, S09: 방 화면(원래 탭). 작은 창이 열려 있으면 이 탭은 상태·다시 열기 안내 중심 (PIP-02).
-import { useCallback, useEffect, useState } from 'react'
+import { type MouseEvent, useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { navigate } from '../app/router'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, usePip } from '../pip/usePip'
+import { useSideWindow } from '../pip/useSideWindow'
+import QuestionDetail from '../room/QuestionDetail'
 import PipView, { type PipTab } from '../room/PipView'
 import { useNudge } from '../room/useNudge'
 import { useRoom } from '../room/useRoom'
 import { copyText } from '../lib/clipboard'
 import { call } from '../lib/rpc'
 import { RoundStats } from '../room/AnswerViews'
-import { ROUND_TEXT, errorText, type HostRound } from '../shared/domain'
+import { ROUND_TEXT, errorText, type HostRound, type QuestionCard } from '../shared/domain'
 
 function draftKey(roomId: string) {
   return `nextstep:draft:${roomId}`
@@ -36,7 +38,15 @@ function readDraft(roomId: string) {
 export default function RoomPage({ roomId }: { roomId: string }) {
   const store = useRoom(roomId)
   const { snap } = store
-  const pip = usePip()
+  const side = useSideWindow()
+  // 작은 창을 닫으면 옆 질문 보기 창도 닫는다 (D-042)
+  const pip = usePip(side.close)
+  // 옆 창에 보여줄 질문. 목록에서 사라져도 마지막으로 본 내용은 남긴다
+  const [detail, setDetail] = useState<QuestionCard | null>(null)
+  const openQuestion = (q: QuestionCard, e: MouseEvent<HTMLButtonElement>) => {
+    const src = e.currentTarget.ownerDocument.defaultView ?? window
+    if (side.open(src, '질문 보기 · 다음으로')) setDetail(q)
+  }
   const [tab, setTab] = useState<PipTab>('answer')
   // 작은 창은 가장 작은 200×120으로 연다. ＋로 240×160 (사용자 결정, PRD v1.6 8.2)
   const [compact, setCompact] = useState(true)
@@ -105,6 +115,7 @@ export default function RoomPage({ roomId }: { roomId: string }) {
       nudge={nudge}
       setDraft={setDraft}
       inPip={pip.status === 'open'}
+      onOpenQuestion={openQuestion}
     />
   )
 
@@ -198,6 +209,13 @@ export default function RoomPage({ roomId }: { roomId: string }) {
       )}
 
       {pip.pipWindow && createPortal(view, pip.pipWindow.document.body)}
+      {side.win && detail && (() => {
+        const live = snap.questions_page.find((c) => c.id === detail.id)
+        return createPortal(
+          <QuestionDetail store={store} card={live ?? detail} stale={!live} onClose={side.close} />,
+          side.win.document.body,
+        )
+      })()}
     </main>
   )
 }

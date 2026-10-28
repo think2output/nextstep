@@ -94,7 +94,7 @@ try {
   await student2.getByRole('button', { name: /^질문/ }).click()
   await student2.getByRole('button', { name: '저도 궁금해요 0' }).click()
   await student2.getByRole('button', { name: '저도 궁금해요 1' }).waitFor({ timeout: 5_000 })
-  step('다른 학생 🙋 공감 +1')
+  step('다른 학생 공감 +1')
   await pipShot(student2, 'tests/e2e/pip-student-question.png')
 
   // 재촉: 강사가 이해 확인을 보내고 미응답자에게 재촉 → 학생 빨간 테두리·안내
@@ -117,9 +117,21 @@ try {
   // 강사: 질문 보이고 답변 완료
   await host.getByRole('button', { name: /^질문/ }).click()
   await host.getByText('useEffect 왜 두 번 실행돼요?').waitFor({ timeout: 5_000 })
-  await host.getByRole('button', { name: '답변 완료로 표시' }).click()
+
+  // 강사: 질문 줄을 누르면 옆 질문 보기 창 (D-042). 원래 탭이 그려 넣으므로 새 연결 없이 같은 상태를 본다
+  const [side] = await Promise.all([
+    host.context().waitForEvent('page'),
+    host.locator('.qv-line', { hasText: 'useEffect 왜 두 번 실행돼요?' }).click(),
+  ])
+  await side.locator('.qd-body', { hasText: 'useEffect 왜 두 번 실행돼요?' }).waitFor({ timeout: 5_000 })
+  await side.getByLabel('저도 궁금해요 1').waitFor()
+  await side.getByRole('button', { name: '답변 완료' }).click()
   await host.getByRole('button', { name: '미답변 0' }).waitFor({ timeout: 5_000 })
-  step('강사 질문 확인·답변 완료')
+  await side.getByText(/목록에서 사라진 질문이에요/).waitFor({ timeout: 5_000 })
+  await side.getByRole('button', { name: '질문 보기 닫기' }).click()
+  await side.waitForEvent('close', { timeout: 3_000 }).catch(() => {})
+  if (!side.isClosed()) throw new Error('옆 질문 보기 창이 닫히지 않음')
+  step('강사 질문 줄 → 옆 창 원문·공감 수, 옆 창에서 답변 완료 → 미답변 0, 닫기')
 
   await host.screenshot({ path: 'tests/e2e/host.png', fullPage: true })
   await student.screenshot({ path: 'tests/e2e/student.png', fullPage: true })
