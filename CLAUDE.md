@@ -88,7 +88,8 @@ npm install      # 의존성 설치
 npm run dev      # 개발 서버 http://localhost:5173 (localhost는 HTTPS 없이 PiP 동작)
 npm run build    # 타입 검사 + 빌드
 npm run lint     # oxlint
-npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (npm run dev 켜둔 상태, 설치된 Chrome 사용)
+npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (npm run dev 켜둔 상태, 설치된 Chrome 사용). BASE_URL=배포주소 로 배포본
+node tests/e2e/latency.mjs 20   # 강사↔학생 반영 지연 중앙값·P95 (BASE_URL 지정 가능)
 npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
 
 npx supabase db push --linked --dry-run   # 적용 예정 migration 확인

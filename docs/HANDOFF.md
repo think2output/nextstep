@@ -24,12 +24,12 @@
 - 배포: https://nextstep-smoky.vercel.app (Vercel 프로젝트 nextstep, GitHub main push마다 자동 배포). 이 PC의 Vercel CLI는 사용자 계정으로 로그인·link 되어 있다.
 - Supabase 프로젝트 rumytuhqrrpdvtojokpz(Tokyo), migration 6개. CLI 로그인·link 됨. Realtime 공개 채널 꺼짐. Auth site_url = 배포 주소.
 - .env.local 에 VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, PILOT_CODE(방 만들기 코드), VERCEL_OIDC_TOKEN이 있다. 커밋·채팅·로그 금지.
-- npm test 35개 통과. npm run smoke 12단계 통과(BASE_URL=배포주소 로 배포본도 시험 가능). 배포 주소 smoke 간헐 실패 3회 기록(docs/test-report.md).
+- npm test 35개 통과. npm run smoke 12단계 통과(BASE_URL=배포주소 로 배포본도 시험 가능). 반영 지연은 tests/e2e/latency.mjs (배포 30회 P95 0.85초).
 - 사용자 실기: G5·G7·G8 통과, 옆 질문 보기 창 동작, 연결 끊김 2단계 표시 통과(사용자 보고). G6 10분 남음.
 
 ## 이번에 할 일 (우선순위 순) — 자세한 건 docs/STATUS.md "다음 작업"
 1. 사용자와 실기 마무리: G6(원래 탭 뒤 10분), ↗ 동작, 옆 창 좌우 자동 배치·두 모니터, 끊긴 동안 보낸 요청이 복구 후 보이는지(AT47) → docs/gate-01.md.
-2. 배포 주소 smoke 간헐 실패 원인: 전체 출력을 남기고 반복 실행, 실패 단계·요청 수신 지연 시간 측정.
+2. (조사 완료) 배포 smoke 간헐 실패는 재현 안 됨. smoke가 2초 초과를 “느림”으로 출력하니 다시 보이면 기록. 지연 분포는 node tests/e2e/latency.mjs.
 3. 남은 인수 테스트: AT06, AT25, AT47·AT48, AT51·AT52, AT54·AT55, AT56(30명 60분, 스크립트), AT59 Network 탭, AT60.
 4. 알려진 빈틈 중 P0에 걸리는 것.
 발표 자료·시연 영상(DEV10)은 사용자가 요청할 때 시작한다.
@@ -55,6 +55,7 @@
 
 ## 자주 쓰는 명령
 npm run dev / npm run build / npm run lint / npm test / npm run smoke(dev 켜둔 상태) / BASE_URL=https://nextstep-smoky.vercel.app npm run smoke
+node tests/e2e/latency.mjs 20 (BASE_URL 지정 가능) — 강사↔학생 반영 지연 중앙값·P95
 npx supabase db push --linked --dry-run / npx supabase db push --linked / npx supabase db query --linked "<sql>" / npx supabase db advisors --linked
 npx vercel ls / npx vercel inspect <배포주소>
 ```

@@ -76,6 +76,7 @@ npm test          # tests/db: 원격 Supabase에 익명 사용자를 만들어 R
 npm run smoke     # tests/e2e: npm run dev 켜둔 상태에서 설치된 Chrome(헤드리스)으로 강사·학생 흐름 (BASE_URL=배포주소 로 배포본 시험)
 npm run build     # 타입 검사 + 빌드
 npm run lint
+node tests/e2e/latency.mjs 20   # 강사↔학생 화면 반영 지연(중앙값·P95). BASE_URL=배포주소 로 배포본 측정
 ```
 
 결과 기록: [`docs/test-report.md`](docs/test-report.md). 작은 창 실기 시험: [`docs/gate-01.md`](docs/gate-01.md).

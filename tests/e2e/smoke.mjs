@@ -14,6 +14,18 @@ const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const errors = []
 const step = (msg) => console.log(`✓ ${msg}`)
 
+// 다른 화면에 반영되는 것(실시간)은 heartbeat 복구 범위(15초, PRD 12.2)까지 기다린다.
+// 실패는 16초 초과만, 2초(PRD 3.2 P95 목표) 넘으면 경고로 시간을 남긴다. 지연 분포는 tests/e2e/latency.mjs
+const RT_WAIT = 16_000
+const SLOW_MS = 2_000
+const slow = []
+async function seen(locator, label, options = {}) {
+  const t0 = Date.now()
+  await locator.waitFor({ timeout: RT_WAIT, ...options })
+  const ms = Date.now() - t0
+  if (ms > SLOW_MS) slow.push(`${label} ${ms}ms`)
+}
+
 async function profile(name) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
   const page = await ctx.newPage()
@@ -61,21 +73,21 @@ try {
   step('강사 준비 확인 시작')
 
   // 학생: 요청 수신 → 응답
-  await student.getByText('실습할 준비가 됐나요?').waitFor({ timeout: 5_000 })
+  await seen(student.getByText('실습할 준비가 됐나요?'), '요청 → 학생')
   await student.getByRole('button', { name: '준비됐어요' }).click()
   await student.locator('.pv-toast', { hasText: '전송 완료' }).waitFor()
   await student.getByText('‘준비됐어요’로 전달했어요').waitFor({ state: 'attached' })
   step('학생 응답 승인 후 ‘전송 완료’ 표시')
 
   // 강사: 집계 반영 (대상 1명 중 1명 → 100%, 과반)
-  await host.locator('.pip-frame [title="준비됐어요 1명 (100%)"]').waitFor({ timeout: 5_000 })
+  await seen(host.locator('.pip-frame [title="준비됐어요 1명 (100%)"]'), '응답 → 강사 집계')
   step('강사 집계 준비됨 1명·100% 표시')
   await pipShot(host, 'tests/e2e/pip-host-active.png')
 
   // 강사: 확인 종료 → 지난 기록, 학생: 지난 응답 표시
   await host.getByRole('button', { name: '확인 종료' }).click()
   await host.getByRole('heading', { name: '지난 확인 기록' }).waitFor({ timeout: 5_000 })
-  await student.getByText('지난 준비 확인: ‘준비됐어요’로 응답했어요').waitFor({ timeout: 5_000 })
+  await seen(student.getByText('지난 준비 확인: ‘준비됐어요’로 응답했어요'), '종료 → 학생')
   step('지난 확인 기록(강사)·지난 응답(학생) 표시')
 
   // 학생: 질문 남기기
@@ -93,7 +105,7 @@ try {
   await student2.getByRole('button', { name: /작은 창 없이 여기서 쓰기/ }).click()
   await student2.getByRole('button', { name: /^질문/ }).click()
   await student2.getByRole('button', { name: '저도 궁금해요 0' }).click()
-  await student2.getByRole('button', { name: '저도 궁금해요 1' }).waitFor({ timeout: 5_000 })
+  await seen(student2.getByRole('button', { name: '저도 궁금해요 1' }), '공감 반영')
   step('다른 학생 공감 +1')
   await pipShot(student2, 'tests/e2e/pip-student-question.png')
 
@@ -101,7 +113,7 @@ try {
   await host.getByRole('button', { name: '이해 확인' }).click()
   await host.getByText('이해 확인 진행 중').waitFor()
   await host.getByRole('button', { name: /^미응답 2명에게 재촉하기/ }).click()
-  await student.getByRole('button', { name: /^응답/ }).locator('.pv-badge-alert').waitFor({ timeout: 5_000 })
+  await seen(student.getByRole('button', { name: /^응답/ }).locator('.pv-badge-alert'), '재촉 → 학생')
   await student.getByRole('button', { name: /^응답/ }).click()
   await student.getByText('강사님이 응답을 기다리고 있어요').waitFor()
   await student.locator('.pv-nudge').waitFor()
@@ -116,7 +128,7 @@ try {
 
   // 강사: 질문 보이고 답변 완료
   await host.getByRole('button', { name: /^질문/ }).click()
-  await host.getByText('useEffect 왜 두 번 실행돼요?').waitFor({ timeout: 5_000 })
+  await seen(host.getByText('useEffect 왜 두 번 실행돼요?'), '질문 → 강사')
 
   // 강사: 질문 줄을 누르면 옆 질문 보기 창 (D-042). 원래 탭이 그려 넣으므로 새 연결 없이 같은 상태를 본다
   const [side] = await Promise.all([
@@ -126,7 +138,7 @@ try {
   await side.locator('.qd-body', { hasText: 'useEffect 왜 두 번 실행돼요?' }).waitFor({ timeout: 5_000 })
   await side.getByLabel('저도 궁금해요 1').waitFor()
   await side.getByRole('button', { name: '답변 완료' }).click()
-  await host.getByRole('button', { name: '미답변 0' }).waitFor({ timeout: 5_000 })
+  await seen(host.getByRole('button', { name: '미답변 0' }), '답변 완료 → 목록')
   await side.getByText(/목록에서 사라진 질문이에요/).waitFor({ timeout: 5_000 })
   await side.getByRole('button', { name: '질문 보기 닫기' }).click()
   await side.waitForEvent('close', { timeout: 3_000 }).catch(() => {})
@@ -141,6 +153,7 @@ try {
   await browser.close()
 }
 
+if (slow.length) console.log(`\n느림(2초 초과, 실패 아님): ${slow.join(', ')}`)
 if (errors.length) {
   console.log('\n문제:\n' + errors.join('\n'))
   process.exit(1)
