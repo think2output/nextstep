@@ -199,7 +199,7 @@ export default function QuestionView({ store, draft, setDraft, onOpenQuestion }:
                       <span className="qv-mini" aria-label={`저도 궁금해요 ${q.reaction_count}`} title="저도 궁금해요">+{q.reaction_count}</span>
                       <button
                         type="button"
-                        className="qv-mini"
+                        className={`qv-mini${q.status === 'pending' ? ' qv-done' : ''}`}
                         aria-label={q.status === 'pending' ? '답변 완료로 표시' : '미답변으로 되돌리기'}
                         title={q.status === 'pending' ? '답변 완료' : '미답변으로 되돌리기'}
                         disabled={!store.canWrite || busy}
