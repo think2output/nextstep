@@ -1,17 +1,16 @@
 // S02~S04, S09: 방 화면(원래 탭). 작은 창이 열려 있으면 이 탭은 상태·다시 열기 안내 중심 (PIP-02).
-import { type MouseEvent, useCallback, useEffect, useState } from 'react'
+import { type MouseEvent, useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { navigate } from '../app/router'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, usePip } from '../pip/usePip'
 import { useSideWindow } from '../pip/useSideWindow'
 import QuestionDetail from '../room/QuestionDetail'
+import RoomReport from './RoomReport'
 import PipView, { type PipTab } from '../room/PipView'
 import { useNudge } from '../room/useNudge'
 import { useRoom } from '../room/useRoom'
 import { copyText } from '../lib/clipboard'
-import { call } from '../lib/rpc'
-import { RoundStats } from '../room/AnswerViews'
-import { ROUND_TEXT, errorText, type HostRound, type QuestionCard } from '../shared/domain'
+import { errorText, type QuestionCard } from '../shared/domain'
 
 function draftKey(roomId: string) {
   return `nextstep:draft:${roomId}`
@@ -196,7 +195,9 @@ export default function RoomPage({ roomId }: { roomId: string }) {
         )}
       </section>
 
-      {isHost && <RoundHistory roomId={roomId} lastClosedId={snap.latest_closed_round?.id ?? null} />}
+      {isHost && (
+        <RoomReport roomId={roomId} lastClosedId={snap.latest_closed_round?.id ?? null} pendingQuestions={snap.pending_question_count} />
+      )}
 
       {isHost && !ended && (
         <section className="section stack">
@@ -260,37 +261,3 @@ function HostShare({ joinCode }: { joinCode: string }) {
 }
 
 // 지난 확인 기록 (사용자 피드백 2). 마지막으로 닫힌 회차가 바뀔 때 다시 불러온다.
-function RoundHistory({ roomId, lastClosedId }: { roomId: string; lastClosedId: string | null }) {
-  const [rounds, setRounds] = useState<HostRound[] | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    void call<{ rounds: HostRound[] }>('get_round_history', { p_room_id: roomId, p_limit: 20 }).then((res) => {
-      if (!cancelled && res.ok) setRounds(res.data.rounds)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [roomId, lastClosedId])
-
-  if (!rounds || rounds.length === 0) return null
-  return (
-    <section className="section">
-      <h2 className="section-title">지난 확인 기록</h2>
-      <ol className="history">
-        {rounds.map((r) => (
-          <li key={r.id} className="history-item">
-            <div className="history-head">
-              <span>{ROUND_TEXT[r.type].label}</span>
-              <time dateTime={r.closed_at ?? undefined}>
-                {r.closed_at &&
-                  new Date(r.closed_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
-              </time>
-            </div>
-            <RoundStats round={r} />
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
-}

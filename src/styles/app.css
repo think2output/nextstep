@@ -1694,3 +1694,193 @@ button:disabled {
   background: var(--blue-500);
   color: #fff;
 }
+
+/* ═════════ 수업 리포트 (원래 탭, 강사, D-044) ═════════ */
+.report {
+  --series-ready: #2a78d6;
+  --series-understood: #1baf7a;
+  --series-proceed: #6250d6;
+}
+
+.report-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 420px) {
+  .report-tiles {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.report-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  border-radius: var(--radius-m);
+  background: var(--grey-50);
+}
+
+.report-tile-label {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.report-tile-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 뜻은 라벨(‘대기가 과반’)이 전하고 색은 보조 */
+.report-tile-warn {
+  color: #b85c00;
+}
+
+.report-chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 20px;
+}
+
+.report-sub {
+  margin: 0;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.report-legend {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.report-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.report-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.report-chart {
+  position: relative;
+  height: 120px;
+  margin-top: 10px;
+  padding-left: 34px;
+  border-bottom: 1px solid var(--grey-300, #d1d6db);
+}
+
+.report-axis {
+  position: absolute;
+  left: 0;
+  font-size: 11px;
+  color: var(--text-sub);
+  transform: translateY(-50%);
+}
+
+.report-axis-100 {
+  top: 0;
+}
+
+.report-axis-50 {
+  top: 50%;
+}
+
+.report-half {
+  position: absolute;
+  left: 34px;
+  right: 0;
+  top: 50%;
+  z-index: 1;
+  border-top: 1px dashed var(--grey-400, #b0b8c1);
+  pointer-events: none; /* 점선이 막대 클릭을 가로채지 않게 */
+}
+
+.report-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100%;
+}
+
+/* 누르는 영역은 막대보다 크게 (열 전체) */
+.report-bar-hit {
+  flex: 1;
+  max-width: 28px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  border: 0;
+  border-radius: 4px 4px 0 0;
+  background: none;
+  cursor: pointer;
+}
+
+.report-bar-hit:hover .report-bar,
+.report-bar-hit:focus-visible .report-bar {
+  filter: brightness(0.9);
+}
+
+.report-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+}
+
+.report-bar-picked .report-bar {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--grey-800);
+}
+
+.report-ready {
+  background: var(--series-ready);
+}
+
+.report-understood {
+  background: var(--series-understood);
+}
+
+.report-proceed {
+  background: var(--series-proceed);
+}
+
+/* 막대 설명은 차트 아래 한 줄에 (범례·막대를 가리지 않게) */
+.report-readout {
+  min-height: 18px;
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.report-xaxis {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 34px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.report-picked {
+  margin-top: 14px;
+}
+
+.report-toggle {
+  margin-top: 12px;
+}

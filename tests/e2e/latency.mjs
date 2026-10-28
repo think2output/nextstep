@@ -56,7 +56,7 @@ try {
     const t = TYPES[i % TYPES.length]
     // 강사 요청 → 학생 화면에 질문
     await timed('start', i,
-      () => host.getByRole('button', { name: t.button }).click(),
+      () => host.getByRole('button', { name: t.button, exact: true }).click(),
       () => student.getByText(t.question).waitFor({ timeout: WAIT_MS }))
     // 학생 응답 → 강사 화면 1/1명 응답 (학생 화면 승인 표시까지 포함)
     await timed('answer', i,
@@ -66,7 +66,7 @@ try {
     await timed('close', i,
       () => host.getByRole('button', { name: '확인 종료' }).click(),
       () => student.getByText('현재 응답 요청이 없어요').waitFor({ timeout: WAIT_MS }))
-    await host.getByRole('button', { name: TYPES[(i + 1) % TYPES.length].button }).waitFor({ timeout: WAIT_MS })
+    await host.getByRole('button', { name: TYPES[(i + 1) % TYPES.length].button, exact: true }).waitFor({ timeout: WAIT_MS })
     process.stdout.write('.')
   }
   console.log()

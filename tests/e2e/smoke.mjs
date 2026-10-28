@@ -68,7 +68,7 @@ try {
 
   // 강사: 연결된 학생 확인 후 준비 확인 보내기
   await host.getByText('지금 연결된 수강생 1명').waitFor({ timeout: 15_000 })
-  await host.getByRole('button', { name: '준비 확인' }).click()
+  await host.getByRole('button', { name: '준비 확인', exact: true }).click()
   await host.getByText('준비 확인 진행 중').waitFor()
   step('강사 준비 확인 시작')
 
@@ -86,9 +86,11 @@ try {
 
   // 강사: 확인 종료 → 지난 기록, 학생: 지난 응답 표시
   await host.getByRole('button', { name: '확인 종료' }).click()
-  await host.getByRole('heading', { name: '지난 확인 기록' }).waitFor({ timeout: 5_000 })
+  // 강사 원래 탭 수업 리포트에 방금 종료한 확인이 막대·숫자로 들어간다 (D-044)
+  await host.getByRole('heading', { name: '수업 리포트' }).waitFor({ timeout: 5_000 })
+  await host.getByRole('button', { name: /준비 확인 · 준비됨 100% · 응답 1\/1명/ }).waitFor({ timeout: 5_000 })
   await seen(student.getByText('지난 준비 확인: ‘준비됐어요’로 응답했어요'), '종료 → 학생')
-  step('지난 확인 기록(강사)·지난 응답(학생) 표시')
+  step('수업 리포트에 종료한 확인(강사)·지난 응답(학생) 표시')
 
   // 학생: 질문 남기기
   await student.getByRole('button', { name: /^질문/ }).click()
@@ -110,7 +112,7 @@ try {
   await pipShot(student2, 'tests/e2e/pip-student-question.png')
 
   // 재촉: 강사가 이해 확인을 보내고 미응답자에게 재촉 → 학생 빨간 테두리·안내
-  await host.getByRole('button', { name: '이해 확인' }).click()
+  await host.getByRole('button', { name: '이해 확인', exact: true }).click()
   await host.getByText('이해 확인 진행 중').waitFor()
   await host.getByRole('button', { name: /^미응답 2명에게 재촉하기/ }).click()
   await seen(student.getByRole('button', { name: /^응답/ }).locator('.pv-badge-alert'), '재촉 → 학생')
