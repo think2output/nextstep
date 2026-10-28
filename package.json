@@ -9,7 +9,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "smoke": "node tests/e2e/smoke.mjs"
+    "smoke": "node tests/e2e/smoke.mjs",
+    "pilot:new": "node scripts/pilot-code.mjs new",
+    "pilot:set": "node scripts/pilot-code.mjs set"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

@@ -42,7 +42,7 @@ PRD와 다른 문서가 충돌하면 **PRD가 우선**이다. 다른 문서를 P
 
 - 변경마다 관련 PRD 요구 ID를 커밋 메시지·PR·`docs/STATUS.md`에 연결한다. 예: `feat(resp): set_response 멱등 처리 [RESP-03, AT26]`
 - 요구사항이 모호하면 추측으로 채우지 말고 `docs/STATUS.md`의 "열린 질문"에 적고 사람에게 묻는다.
-- PRD의 수치·정책(30명, 200자, 24시간, 45초 등)을 바꾸려면 `docs/PRD.md` 변경 이력 + `docs/decisions.md` 기록이 먼저다.
+- PRD의 수치·정책(정원 50명, 200자, 24시간, 45초 등)을 바꾸려면 `docs/PRD.md` 변경 이력 + `docs/decisions.md` 기록이 먼저다.
 - 변경 후 관련 인수 테스트(AT)를 우선 실행하고, 결과·미검증 범위를 `docs/test-report.md`에 기록한다.
 - 실행해 보지 않은 명령을 README에 "확인됨"으로 쓰지 않는다.
 - AI가 만든 오류를 발견·수정했으면 `docs/ai-log.md`에 기록한다.
@@ -92,6 +92,8 @@ npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (n
 node tests/e2e/latency.mjs 20   # 강사↔학생 반영 지연 중앙값·P95 (BASE_URL 지정 가능)
 npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
 
+npm run pilot:set / pilot:new   # 운영자 코드 바꾸기 (사용자가 자기 터미널에서. 에이전트가 대신 실행하면 코드가 출력·변경됨)
+
 npx supabase db push --linked --dry-run   # 적용 예정 migration 확인
 npx supabase db push --linked             # migration 원격 적용 (supabase login 필요)
 npx supabase db query --linked "<sql>"    # 원격 SQL 실행
@@ -100,6 +102,6 @@ npx supabase db advisors --linked         # 보안·성능 점검
 
 - DB 변경은 반드시 새 migration 파일로 한다. 이미 적용된 migration 파일을 고치지 않는다.
 - 공개 RPC를 추가하면 rpc migration 끝의 권한 블록처럼 `revoke ... from public, anon` + `grant ... to authenticated`를 함께 넣는다.
-- 파일럿 코드 원문은 `.env.local`의 `PILOT_CODE`(VITE_ 접두사 금지 → 번들에 안 들어감). DB에는 bcrypt 해시만 `private.app_secrets.pilot_code_hash`.
+- 파일럿 코드 원문은 `.env.local`의 `PILOT_CODE`(VITE_ 접두사 금지 → 번들에 안 들어감). DB에는 bcrypt 해시만 `private.app_secrets.pilot_code_hash`. 바꿀 때는 `scripts/pilot-code.mjs`(npm run pilot:new / pilot:set).
 - 화면: `/` 시작, `/join?code=` 참여 링크, `/room/<id>` 방, `/gate` GATE-01 시험 페이지(시험 전용, `npm run dev`에서만 열림 D-030). 상태는 `src/room/useRoom.ts` 하나가 원래 탭·작은 창 공유.
 - 디자인 토큰은 `src/styles/tokens.css`(TDS 참고, Toss 로고·이름·전용 폰트 금지). 작은 창 전용 규칙은 `.pip-doc`·`.pv`·`.qv` 아래.

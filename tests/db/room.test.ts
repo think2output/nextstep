@@ -1,6 +1,6 @@
 // 방 생성·참여·종료 (PRD 7장, AT01~AT07, AT50~AT51)
 import { describe, expect, it } from 'vitest'
-import { PILOT_CODE, aid, createRoom, joinRoom, newUser, rpc, snapshot } from './helpers'
+import { PILOT_CODE, aid, createRoom, joinRoom, newUser, rpc, setupRoom, snapshot } from './helpers'
 
 describe('create_room', () => {
   it('파일럿 코드가 틀리면 거절', async () => {
@@ -112,4 +112,19 @@ describe('end_room', () => {
     const res = await rpc(student, 'end_room', { p_room_id: room.room_id, p_action_id: aid() })
     expect(res.error?.code).toBe('FORBIDDEN')
   })
+})
+
+// AT06 정원 (PRD v1.12: 학생 50명). 익명 로그인을 52번 쓰므로 평소 npm test에서는 건너뛴다.
+// 실행: CAPACITY_TEST=1 npx vitest run tests/db/room.test.ts -t AT06
+describe('정원', () => {
+  it.skipIf(!process.env.CAPACITY_TEST)('AT06 학생 50명까지 입장, 51번째 거절', async () => {
+    const { room, students } = await setupRoom(50)
+    expect(students).toHaveLength(50)
+    const extra = await newUser()
+    const res = await rpc(extra, 'join_room', { p_code: room.join_code, p_action_id: aid() })
+    expect(res.error?.code).toBe('ROOM_FULL')
+    // 이미 들어온 학생의 재참여는 인원을 늘리지 않고 성공
+    const again = await joinRoom(students[0], room.join_code)
+    expect(again.role).toBe('student')
+  }, 180_000)
 })

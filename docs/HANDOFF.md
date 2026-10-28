@@ -17,12 +17,12 @@
 1. CLAUDE.md — 절대 규칙 15개와 작업 방식. 어기면 안 된다.
 2. docs/STATUS.md — 현재 단계, 다음 작업 우선순위, 알려진 빈틈, 열린 질문.
 3. docs/architecture.md — 실제 코드·migration·RPC 구조.
-4. docs/PRD.md (v1.11) — 요구사항 원천. 필요한 장만 요구 ID(RESP-02, AT17 등)로 찾아 읽어라. 8.2~8.6은 사용자와 반복 실기로 정한 값이 많다.
-5. docs/decisions.md — 이미 내린 결정(D-001~D-044). 다시 논쟁하지 말고, 바꾸려면 새 항목을 추가해라.
+4. docs/PRD.md (v1.12) — 요구사항 원천. 필요한 장만 요구 ID(RESP-02, AT17 등)로 찾아 읽어라. 8.2~8.6은 사용자와 반복 실기로 정한 값이 많다.
+5. docs/decisions.md — 이미 내린 결정(D-001~D-046). 다시 논쟁하지 말고, 바꾸려면 새 항목을 추가해라.
 
 ## 지금 상태
 - 배포: https://nextstep-smoky.vercel.app (Vercel 프로젝트 nextstep, GitHub main push마다 자동 배포). 이 PC의 Vercel CLI는 사용자 계정으로 로그인·link 되어 있다.
-- Supabase 프로젝트 rumytuhqrrpdvtojokpz(Tokyo), migration 6개. CLI 로그인·link 됨. Realtime 공개 채널 꺼짐. Auth site_url = 배포 주소.
+- Supabase 프로젝트 rumytuhqrrpdvtojokpz(Tokyo), migration 7개(정원 50명). 운영자 코드는 npm run pilot:new / pilot:set (사용자가 직접 실행, 코드 원문을 채팅·로그에 남기지 말 것). CLI 로그인·link 됨. Realtime 공개 채널 꺼짐. Auth site_url = 배포 주소.
 - .env.local 에 VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, PILOT_CODE(방 만들기 코드), VERCEL_OIDC_TOKEN이 있다. 커밋·채팅·로그 금지.
 - npm test 35개 통과. npm run smoke 12단계 통과(BASE_URL=배포주소 로 배포본도 시험 가능). 반영 지연은 tests/e2e/latency.mjs (배포 30회 P95 0.85초).
 - 사용자 실기: G5·G7·G8 통과, 옆 질문 보기 창 동작, 연결 끊김 2단계 표시 통과(사용자 보고). G6 10분 남음.
@@ -30,7 +30,7 @@
 ## 이번에 할 일 (우선순위 순) — 자세한 건 docs/STATUS.md "다음 작업"
 1. 사용자와 실기 마무리: G6(원래 탭 뒤 10분), ↗ 동작, 옆 창 좌우 자동 배치·두 모니터, 끊긴 동안 보낸 요청이 복구 후 보이는지(AT47) → docs/gate-01.md.
 2. (조사 완료) 배포 smoke 간헐 실패는 재현 안 됨. smoke가 2초 초과를 “느림”으로 출력하니 다시 보이면 기록. 지연 분포는 node tests/e2e/latency.mjs.
-3. 남은 인수 테스트: AT06, AT25, AT47·AT48, AT51·AT52, AT54·AT55, AT56(30명 60분, 스크립트), AT59 Network 탭, AT60.
+3. 남은 인수 테스트: AT25, AT47·AT48, AT51·AT52, AT54·AT55, AT56(50명 60분, 스크립트), AT59 Network 탭, AT60.
 4. 알려진 빈틈 중 P0에 걸리는 것.
 발표 자료·시연 영상(DEV10)은 사용자가 요청할 때 시작한다. 계획은 docs/presentation-plan.md (기능별 GIF → PPT), 바탕 자료는 docs/work-summary.md.
 
@@ -46,9 +46,9 @@
 - 실행해 보지 않은 명령·결과를 "확인됨"으로 쓰지 않는다. 사용자 보고·자동 시험·근사 측정을 구분해 적는다.
 
 ## 작업할 때마다 남길 기록
-- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-051부터).
+- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-056부터).
 - AI가 틀렸다가 고친 것 → docs/ai-log.md.
-- 결정 → docs/decisions.md (D-045부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
+- 결정 → docs/decisions.md (D-047부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
 - 시험 결과 → docs/test-report.md, 작은 창 실기 → docs/gate-01.md.
 - 끝날 때 docs/STATUS.md "현재 단계·다음 작업"과 이 파일(docs/HANDOFF.md)의 프롬프트를 갱신.
 - 커밋 메시지에 관련 요구 ID를 붙인다. 예: fix(pip): … [PRD 8.4, RESP-04]

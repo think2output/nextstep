@@ -19,3 +19,4 @@ AI 출력에서 발견한 문제와 수정을 기록한다. 실제 발생한 사
 | 2026-10-28 | 수업 리포트 막대 | 50% 점선(절대 위치)이 막대 위에 겹쳐 막대 클릭·hover를 가로챔 | 사진용 Playwright 스크립트의 hover가 “report-half intercepts pointer events”로 실패 | 점선 pointer-events:none | 막대 hover·클릭 사진 확인 |
 | 2026-10-28 | 시험 스크립트 버튼 찾기 | 리포트 막대 버튼 이름(“14:18 준비 확인 · …”)에 ‘준비 확인’이 들어가 smoke·latency의 getByRole('button', { name: '준비 확인' })가 두 개를 찾음(부분 일치) | 리포트 사진 스크립트 strict mode 오류 | 확인 버튼은 exact: true로 찾기 (smoke·latency) | smoke 통과 |
 | 2026-10-28 | smoke ‘지난 확인 기록’ 단계 | 리포트로 화면을 바꾸면서 smoke가 찾는 제목(‘지난 확인 기록’)을 고치지 않아 smoke 실패 | 커밋 전 smoke | 리포트 제목·종료한 확인 막대를 확인하도록 단계 수정 | smoke 12단계 통과 |
+| 2026-10-28 | 운영자 코드 명령(pilot:set) | 두 번 묻는 입력을 질문마다 새 readline으로 받아, 붙여 넣은 입력을 첫 질문이 다 가져가 두 번째가 영원히 대기 | 파이프 입력 시험 | 한 입력 흐름에서 두 줄을 받도록 수정 | 같은 코드 재반영·불일치·잘못된 형식 세 경우 확인, .env.local 변화 없음 |

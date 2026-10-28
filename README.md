@@ -59,11 +59,15 @@ npx supabase config push          # 익명 로그인 켜기, 익명 로그인 �
 npx supabase db push --linked     # supabase/migrations 적용 (pg_cron 정리 작업 포함)
 ```
 
-방 만들기 코드 설정 (원문은 저장하지 않고 bcrypt 해시만):
+방 만들기 코드(운영자 코드) 설정 — 서버에는 bcrypt 해시만 저장, 원문은 `.env.local`의 `PILOT_CODE`에만:
 
 ```bash
-npx supabase db query --linked "insert into private.app_secrets(name, value) values ('pilot_code_hash', extensions.crypt('<코드>', extensions.gen_salt('bf', 10))) on conflict (name) do update set value = excluded.value;"
+npm run pilot:new   # 무작위 12자 코드를 만들어 서버에 반영하고 .env.local에 저장, 터미널에 한 번 보여줌
+npm run pilot:set   # 원하는 코드를 직접 입력 (입력 글자는 화면에 안 보임, 8~72자, 영문·숫자·!@#$%^&*_+=.-)
 ```
+
+- Supabase CLI 로그인·link가 필요하다. 반영 전까지는 이전 코드가 통한다.
+- 코드는 대소문자를 구분한다. 강사에게는 따로 전하고 저장소·발표 자료·채팅에 넣지 않는다.
 
 - `config push`는 원격과 다른 설정을 모두 덮어쓴다. 실행 전 출력되는 차이를 확인한다.
 - service_role key는 쓰지 않는다. 저장소·프런트에 넣지 않는다.

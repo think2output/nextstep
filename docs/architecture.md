@@ -41,6 +41,7 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 | `src/pip/useSideWindow.ts` | 옆 질문 보기 창(보통 팝업). 작은 창 기준 빈 쪽 배치, 원래 탭이 portal로 그림 (D-042) |
 | `src/room/QuestionDetail.tsx`, `src/room/useQuestionActions.ts` | 옆 창 질문 원문·조작, 공감·답변 완료·숨기기 공통 로직 |
 | `src/pages/RoomReport.tsx` | 강사 원래 탭 수업 리포트(get_round_history 50개 집계, D-044) |
+| `scripts/pilot-code.mjs` | 운영자 코드 바꾸기(npm run pilot:new / pilot:set), 서버엔 bcrypt 해시 (D-046) |
 | `src/gate/` | GATE-01 시험 전용(공개 채널, `?role=`) — 제품 코드에서 재사용 금지 |
 | `supabase/migrations/` | 아래 3장 |
 | `tests/db/` | 실제 프로젝트에 대고 도는 RPC·권한 테스트(vitest) |
@@ -105,4 +106,4 @@ payload에 본문·작성자·선택값 없음 (tests/db/security.test.ts로 검
 
 ## 7. 주요 수치
 
-정원 학생 30 / 수업명 1~30자 / 질문 1~200자(10초 간격, 학생 20, 방 300) / heartbeat 15초, 미확인 45초 / 쓰기 타임아웃 8초 / 방 12시간, 종료 후 읽기 24시간 / 응답·공감·재촉 초당 3·분당 60 / 작은 창 240×160, 더 작게 200×120(질문 탭도 크기 유지) / 질문 목록 12px·줄 28px.
+정원 학생 50(v1.12) / 수업명 1~30자 / 질문 1~200자(10초 간격, 학생 20, 방 300) / heartbeat 15초, 미확인 45초 / 쓰기 타임아웃 8초 / 방 12시간, 종료 후 읽기 24시간 / 응답·공감·재촉 초당 3·분당 60 / 작은 창 240×160, 더 작게 200×120(질문 탭도 크기 유지) / 질문 목록 12px·줄 28px.
