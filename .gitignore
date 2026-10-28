@@ -16,3 +16,6 @@ coverage/
 tests/e2e/*.png
 
 .vercel
+
+# 발표 자료(장표·영상 재료)는 로컬에만 — 깃헙에 올리지 않음 (사용자, D-049)
+docs/presentation/

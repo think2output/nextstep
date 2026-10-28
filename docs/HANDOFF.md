@@ -18,7 +18,7 @@
 2. docs/STATUS.md — 현재 단계, 다음 작업 우선순위, 알려진 빈틈, 열린 질문.
 3. docs/architecture.md — 실제 코드·migration·RPC 구조.
 4. docs/PRD.md (v1.12) — 요구사항 원천. 필요한 장만 요구 ID(RESP-02, AT17 등)로 찾아 읽어라. 8.2~8.6은 사용자와 반복 실기로 정한 값이 많다.
-5. docs/decisions.md — 이미 내린 결정(D-001~D-048). 다시 논쟁하지 말고, 바꾸려면 새 항목을 추가해라.
+5. docs/decisions.md — 이미 내린 결정(D-001~D-049). 다시 논쟁하지 말고, 바꾸려면 새 항목을 추가해라.
 
 ## 지금 상태
 - 배포: https://nextstep-smoky.vercel.app (Vercel 프로젝트 nextstep, GitHub main push마다 자동 배포). 이 PC의 Vercel CLI는 사용자 계정으로 로그인·link 되어 있다.
@@ -32,7 +32,7 @@
 ## 이번에 할 일 (우선순위 순) — 자세한 건 docs/STATUS.md "다음 작업"
 0. 제출이 최우선(마감 11/2로 가정, 사용자 확인 필요). 사용자 직군은 PM. 발표 6개 순서·재료: docs/presentation-plan.md 0장.
    - 사용자 비교 시험(docs/user-test-plan.md, D-047): 10/29 동기 4~5명, 강사는 사용자. 끝나면 24시간 안에 npm run usertest:times -- <참여코드> 로 B 시간, 사용자 녹화로 A 시간 → docs/test-report.md에 PRD 20.5 방식으로 계산. 불리한 결과도 그대로.
-   - 발표 자료: 사용자가 claude.ai Slides(장표)·Motion(재현 영상)으로 직접 만든다(D-048). 재료·프롬프트는 docs/presentation/. 비교 시험 뒤 결과 정리본(prompts.md ②에 올릴 것)을 만들어 주고, material-pack.md의 [채울 것]을 채운다. 발표 4~5분, PO 기준.
+   - 발표 자료: 사용자가 claude.ai Slides(장표)·Motion(재현 영상)으로 직접 만든다(D-048). 재료·프롬프트는 docs/presentation/(로컬 전용, git 제외). 비교 시험 뒤 결과 정리본(prompts.md ②에 올릴 것)을 만들어 주고, material-pack.md의 [채울 것]을 채운다. 발표 4~5분, PO 기준.
 1. (제출 준비와 겹치지 않을 때) 남은 인수 테스트 중 혼자 할 수 있는 것부터 (docs/test-report.md 표의 "미실행"):
    - AT56: 학생 50명 + 강사 60분 부하. 정원이 50명으로 바뀌어 꼭 필요. 스크립트로(헤드리스 여러 개 또는 RPC·Realtime 직접). 익명 로그인 한도(시간당 300)를 넘지 않게 계획하고, 지연·연결 수·오류를 기록. 실제 사용자 시험이라고 쓰지 말 것(PRD 3.4).
    - AT51·AT52: 24시간 만료 경계(시험 방의 시간을 과거로 돌려 정리 작업 확인).
@@ -52,13 +52,14 @@
 - 서버가 역할·집계·최종 상태를 정한다. 클라이언트 입력의 role·member_id를 믿지 않는다. 학생에게 다른 학생의 선택·집계·작성자를 주지 않는다. 강사에게도 개별 응답·작성자·미응답자 신원을 주지 않는다.
 - 새 창(옆 창 등)은 원래 탭이 portal로 그려 넣는다. 인증·구독·heartbeat를 새로 만들지 않는다(절대 규칙 11).
 - DB 변경은 새 migration 파일로만. 공개 RPC를 추가하면 revoke public/anon + grant authenticated를 함께. 변경 후 `npx supabase db push --linked` → npm test.
+- 발표 장표·영상 재료(docs/presentation/)는 깃헙에 올리지 않는다(D-049, .gitignore).
 - 비밀값은 커밋·채팅·로그에 남기지 않는다. 커밋 전에 staged diff에서 PILOT_CODE 값을 검색해 0건인지 확인한다(저장소는 공개).
 - 실행해 보지 않은 명령·결과를 "확인됨"으로 쓰지 않는다. 사용자 보고·자동 시험·근사 측정을 구분해 적는다.
 
 ## 작업할 때마다 남길 기록
-- 의미 있는 사용자 프롬프트 → docs/prompts.md (뜻은 그대로, 오타·말투는 다듬어서. 원문을 그대로 붙이지 말 것. P-062부터). 사용자가 "기록하지 말고 이야기만"이라고 하면 그 대화는 적지 않는다.
+- 의미 있는 사용자 프롬프트 → docs/prompts.md (뜻은 그대로, 오타·말투는 다듬어서. 원문을 그대로 붙이지 말 것. P-063부터). 사용자가 "기록하지 말고 이야기만"이라고 하면 그 대화는 적지 않는다.
 - AI가 틀렸다가 고친 것 → docs/ai-log.md.
-- 결정 → docs/decisions.md (D-049부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
+- 결정 → docs/decisions.md (D-050부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
 - 시험 결과 → docs/test-report.md, 작은 창 실기 → docs/gate-01.md.
 - 끝날 때 docs/STATUS.md "현재 단계·다음 작업"과 이 파일(docs/HANDOFF.md)의 프롬프트를 갱신.
 - 커밋 메시지에 관련 요구 ID를 붙인다. 예: fix(pip): … [PRD 8.4, RESP-04]

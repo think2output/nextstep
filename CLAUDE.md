@@ -90,7 +90,7 @@ npm run build    # 타입 검사 + 빌드
 npm run lint     # oxlint
 npm run smoke    # tests/e2e: 헤드리스 Chrome으로 강사·학생 흐름 (npm run dev 켜둔 상태, 설치된 Chrome 사용). BASE_URL=배포주소 로 배포본
 node tests/e2e/latency.mjs 20   # 강사↔학생 반영 지연 중앙값·P95 (BASE_URL 지정 가능)
-node tests/e2e/presentation-shots.mjs   # 발표용 화면 사진 38장 → docs/presentation/shots (dev 켜둔 상태)
+node tests/e2e/presentation-shots.mjs   # 발표용 화면 사진 38장 → docs/presentation/(로컬 전용, git 제외)shots (dev 켜둔 상태)
 npm test         # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한 검사 (.env.local 필요, 1회 약 60명 익명 로그인)
 
 npm run usertest:times -- <참여코드>   # 사용자 비교 시험 B 응답 시간 (시험 후 24시간 안)
