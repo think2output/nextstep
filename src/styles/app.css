@@ -1592,3 +1592,93 @@ button:disabled {
   align-items: center;
   justify-content: center;
 }
+
+/* ───────── 연결 끊김 알림 (PRD v1.10 12.2, D-043) ───────── */
+/* 본문 영역: 띠·덮개를 본문 위에만 겹친다 (탭 줄의 −/＋·↗는 계속 누를 수 있게) */
+.pv-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pv-conn-bad {
+  color: var(--orange-500);
+}
+
+/* 주황 테두리: 다시 연결하는 동안 고정, 20초 넘으면 3번 깜빡인 뒤 유지 (소리 없음) */
+.pv-offline-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 3px solid var(--orange-500);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.pv-offline-down {
+  animation: nudge-blink 0.8s ease-in-out 3;
+}
+
+/* 1단계: 아래쪽 띠 (본문 위에 겹쳐 높이를 늘리지 않음) */
+.pv-offline-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 3px 6px;
+  border-radius: var(--radius-s);
+  background: #fff4e0;
+  color: #8a5a00;
+  font-size: var(--pip-fs-meta);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 2단계: 본문을 덮고 큰 '다시 연결' 버튼 */
+.pv-offline-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgb(255 255 255 / 88%);
+  text-align: center;
+}
+
+.pv-offline-cover p {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--pip-fs-q);
+  font-weight: 700;
+}
+
+.pv-offline-btn {
+  min-height: 32px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--orange-500);
+  color: #fff;
+  font-size: var(--pip-fs-q);
+  font-weight: 700;
+}
+
+.pv-offline-btn:hover {
+  filter: brightness(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv-offline-down {
+    animation: none;
+  }
+}

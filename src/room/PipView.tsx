@@ -1,5 +1,5 @@
 // 작은 창 내용 (PRD 8.2~8.7). 원래 탭의 미리보기 틀과 PiP 창에 같은 컴포넌트를 쓴다.
-import { type MouseEvent, useState } from 'react'
+import { type MouseEvent, useEffect, useState } from 'react'
 import { PIP_SIZE_COMPACT, PIP_SIZE_DEFAULT, resizePip } from '../pip/usePip'
 import type { QuestionCard } from '../shared/domain'
 import { HostAnswer, StudentAnswer } from './AnswerViews'
@@ -49,20 +49,41 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
     if (win && win !== window) win.close()
   }
 
-  const conn =
-    store.conn === 'live' ? (
-      <span className="pv-conn pv-conn-live" title="연결됨" aria-label="연결됨">●</span>
-    ) : store.conn === 'unavailable' ? (
-      <button type="button" className="pv-icon pv-conn pv-conn-bad" onClick={store.reconnect}>다시 연결</button>
-    ) : (
-      <span className="pv-conn pv-conn-bad" aria-live="polite">{store.conn === 'connecting' ? '연결 중' : '재연결 중'}</span>
-    )
+  // 연결 상태는 탭 줄에선 점 색만 (글자를 넣으면 200×120 탭 줄이 꺾임). 끊김은 본문 위 띠·덮개로 크게 알린다 (D-043)
+  const live = store.conn === 'live'
+  const connText = live ? '연결됨' : store.conn === 'unavailable' ? '연결 끊김' : store.conn === 'connecting' ? '연결하는 중' : '다시 연결하는 중'
+  const conn = (
+    <span className={`pv-conn ${live ? 'pv-conn-live' : 'pv-conn-bad'}`} title={connText} aria-label={connText}>●</span>
+  )
+
+  // 한 번 연결된 뒤 끊겼다가 돌아오면 잠깐 '다시 연결됐어요'
+  const [lastConn, setLastConn] = useState(store.conn)
+  const [everLive, setEverLive] = useState(live)
+  const [backToast, setBackToast] = useState(0)
+  if (lastConn !== store.conn) {
+    setLastConn(store.conn)
+    if (live) {
+      if (everLive) setBackToast((n) => n + 1)
+      else setEverLive(true)
+    }
+  }
+  const [backHidden, setBackHidden] = useState(0)
+  useEffect(() => {
+    if (!backToast) return
+    const t = setTimeout(() => setBackHidden(backToast), 1600)
+    return () => clearTimeout(t)
+  }, [backToast])
+  const showBack = backToast > 0 && backHidden !== backToast
 
   return (
     // 크기 전환은 실제 작은 창에서만. 원래 탭 미리보기는 항상 기본 배치
     <div className={`pv${compact && inPip ? ' pv-compact' : ''}`}>
       {/* 재촉: 빨간 테두리 3번 깜빡인 뒤 응답할 때까지 유지 (D-028). 횟수가 바뀌면 key로 애니메이션 재시작 */}
       {nudge.active && <div key={nudge.key} className="pv-nudge" aria-hidden="true" />}
+      {/* 끊김: 주황 테두리. 20초 넘으면 3번 깜빡인 뒤 유지 (소리 없음, D-043) */}
+      {!live && (
+        <div key={store.conn === 'unavailable' ? 'down' : 'retry'} className={`pv-offline-ring${store.conn === 'unavailable' ? ' pv-offline-down' : ''}`} aria-hidden="true" />
+      )}
       <div className="pv-bar">
         <button type="button" className="pv-tab" aria-pressed={tab === 'answer'} onClick={() => setTab('answer')}>
           응답
@@ -97,11 +118,23 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
 
       {snap.room.status === 'ended' && <p className="pv-ended">종료된 방이에요 · 읽기만 가능</p>}
 
-      <div className={`pv-body${tab === 'answer' ? ' pv-scroll-body' : ''}`}>
-        {tab === 'answer' ? (
-          isHost ? <HostAnswer store={store} /> : <StudentAnswer store={store} />
+      <div className="pv-main">
+        <div className={`pv-body${tab === 'answer' ? ' pv-scroll-body' : ''}`}>
+          {tab === 'answer' ? (
+            isHost ? <HostAnswer store={store} /> : <StudentAnswer store={store} />
+          ) : (
+            <QuestionView store={store} draft={draft} setDraft={setDraft} onOpenQuestion={onOpenQuestion} />
+          )}
+        </div>
+        {store.conn === 'unavailable' ? (
+          <div className="pv-offline-cover" role="alert">
+            <p>연결이 끊겼어요</p>
+            <button type="button" className="pv-offline-btn" onClick={store.reconnect}>다시 연결</button>
+          </div>
+        ) : !live ? (
+          <p className="pv-offline-bar" aria-live="polite">⟳ {store.conn === 'connecting' ? '연결하는 중…' : '다시 연결하는 중…'}</p>
         ) : (
-          <QuestionView store={store} draft={draft} setDraft={setDraft} onOpenQuestion={onOpenQuestion} />
+          showBack && <span key={backToast} className="pv-toast" aria-live="polite">✓ 다시 연결됐어요</span>
         )}
       </div>
     </div>

@@ -11,7 +11,8 @@ export type ConnStatus = 'connecting' | 'live' | 'reconnecting' | 'unavailable'
 const HEARTBEAT_MS = 15_000
 const DEBOUNCE_MS = 150
 const MAX_WAIT_MS = 500
-const UNAVAILABLE_AFTER_MS = 30_000
+// 스스로 다시 연결하다가 이 시간 안에 안 되면 '다시 연결' 버튼 (PRD v1.10 12.2, D-043)
+const UNAVAILABLE_AFTER_MS = 20_000
 const PAGE_LIMIT = 50
 const FATAL = new Set(['ROOM_UNAVAILABLE', 'ROOM_EXPIRED', 'FORBIDDEN', 'UNAUTHENTICATED'])
 
@@ -142,9 +143,12 @@ export function useRoom(roomId: string) {
 
     void fetchNow()
     const heartbeat = setInterval(() => void beat(), HEARTBEAT_MS)
+    // 20초 경계를 늦지 않게 넘기도록 1초마다 확인 (로컬 계산만, 서버 호출 없음)
     const badTick = setInterval(() => {
       if (badSince !== null) markBad()
-    }, 5_000)
+    }, 1_000)
+    // 기기 인터넷이 끊기면 heartbeat(15초)를 기다리지 않고 바로 '다시 연결하는 중'으로 (D-043)
+    const onOffline = () => markBad()
     const onWake = () => {
       if (document.visibilityState === 'hidden') return
       schedule()
@@ -152,6 +156,7 @@ export function useRoom(roomId: string) {
     }
     window.addEventListener('focus', onWake)
     window.addEventListener('online', onWake)
+    window.addEventListener('offline', onOffline)
     document.addEventListener('visibilitychange', onWake)
 
     return () => {
@@ -160,6 +165,7 @@ export function useRoom(roomId: string) {
       clearInterval(badTick)
       window.removeEventListener('focus', onWake)
       window.removeEventListener('online', onWake)
+      window.removeEventListener('offline', onOffline)
       document.removeEventListener('visibilitychange', onWake)
       if (channel) void supabase.removeChannel(channel)
     }
