@@ -25,10 +25,10 @@
 - Supabase 프로젝트 rumytuhqrrpdvtojokpz(Tokyo), migration 6개. CLI 로그인·link 됨. Realtime 공개 채널 꺼짐. Auth site_url = 배포 주소.
 - .env.local 에 VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, PILOT_CODE(방 만들기 코드), VERCEL_OIDC_TOKEN이 있다. 커밋·채팅·로그 금지.
 - npm test 35개 통과. npm run smoke 12단계 통과(BASE_URL=배포주소 로 배포본도 시험 가능). 배포 주소 smoke 간헐 실패 3회 기록(docs/test-report.md).
-- 사용자 실기: G5·G7 통과, 옆 질문 보기 창 동작(사용자 보고). G6 10분·G8 남음.
+- 사용자 실기: G5·G7·G8 통과, 옆 질문 보기 창 동작, 연결 끊김 2단계 표시 통과(사용자 보고). G6 10분 남음.
 
 ## 이번에 할 일 (우선순위 순) — 자세한 건 docs/STATUS.md "다음 작업"
-1. 사용자와 실기 마무리: G6(원래 탭 뒤 10분), G8(인터넷 10초 끊기), ↗ 동작, 옆 창 좌우 자동 배치·두 모니터 → docs/gate-01.md.
+1. 사용자와 실기 마무리: G6(원래 탭 뒤 10분), ↗ 동작, 옆 창 좌우 자동 배치·두 모니터, 끊긴 동안 보낸 요청이 복구 후 보이는지(AT47) → docs/gate-01.md.
 2. 배포 주소 smoke 간헐 실패 원인: 전체 출력을 남기고 반복 실행, 실패 단계·요청 수신 지연 시간 측정.
 3. 남은 인수 테스트: AT06, AT25, AT47·AT48, AT51·AT52, AT54·AT55, AT56(30명 60분, 스크립트), AT59 Network 탭, AT60.
 4. 알려진 빈틈 중 P0에 걸리는 것.
@@ -46,7 +46,7 @@
 - 실행해 보지 않은 명령·결과를 "확인됨"으로 쓰지 않는다. 사용자 보고·자동 시험·근사 측정을 구분해 적는다.
 
 ## 작업할 때마다 남길 기록
-- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-045부터).
+- 의미 있는 사용자 프롬프트 → docs/prompts.md (원문, P-046부터).
 - AI가 틀렸다가 고친 것 → docs/ai-log.md.
 - 결정 → docs/decisions.md (D-044부터). PRD 수치·정책을 바꾸면 PRD 버전 올리고 변경 이력에 기록.
 - 시험 결과 → docs/test-report.md, 작은 창 실기 → docs/gate-01.md.
