@@ -101,6 +101,19 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
     })
   }
 
+  // 정렬은 탭 줄이 아니라 질문 탭 첫 줄에 둔다. 탭 줄이 응답·질문에서 같아야 꺾이지 않는다 (사용자 피드백, D-041)
+  const sortButton = (
+    <button
+      type="button"
+      className="pv-icon qv-sort"
+      aria-label={`정렬: ${store.sort === 'popular' ? '저도 궁금해요 많은 순' : '최신순'}. 눌러서 바꾸기`}
+      title={store.sort === 'popular' ? '🙋 많은 순 (눌러서 최신순)' : '최신순 (눌러서 🙋 많은 순)'}
+      onClick={() => store.setSort(store.sort === 'popular' ? 'latest' : 'popular')}
+    >
+      {store.sort === 'popular' ? '🙋⇅' : '🕒⇅'}
+    </button>
+  )
+
   return (
     <>
       {!isHost && (
@@ -115,6 +128,7 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
             disabled={!store.canWrite}
             onChange={(e) => setDraft(e.target.value)}
           />
+          {sortButton}
           <button
             type="button"
             className="qv-send"
@@ -128,16 +142,19 @@ export default function QuestionView({ store, draft, setDraft }: Props) {
         </div>
       )}
 
-      <div className="qv-head" aria-live="polite">
+      <div className={`qv-head${isHost || searching ? '' : ' qv-head-empty'}`} aria-live="polite">
         {isHost ? (
-          <span className="qv-seg" role="group" aria-label="질문 필터">
-            <button type="button" aria-pressed={store.filter === 'pending'} onClick={() => store.setFilter('pending')}>
-              미답변 {snap.pending_question_count}
-            </button>
-            <button type="button" aria-pressed={store.filter === 'answered'} onClick={() => store.setFilter('answered')}>
-              답변 완료
-            </button>
-          </span>
+          <>
+            <span className="qv-seg" role="group" aria-label="질문 필터">
+              <button type="button" aria-pressed={store.filter === 'pending'} onClick={() => store.setFilter('pending')}>
+                미답변 {snap.pending_question_count}
+              </button>
+              <button type="button" aria-pressed={store.filter === 'answered'} onClick={() => store.setFilter('answered')}>
+                답변 완료
+              </button>
+            </span>
+            {sortButton}
+          </>
         ) : searching ? (
           <>
             <span>{list.length > 0 ? `비슷한 질문 ${list.length} · 같으면 🙋` : '비슷한 질문 없음 · ➤로 남기기'}</span>

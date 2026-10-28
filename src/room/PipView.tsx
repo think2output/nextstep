@@ -74,17 +74,6 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
           질문 {snap.pending_question_count}
         </button>
         <span className="pv-spacer" />
-        {tab === 'question' && (
-          <button
-            type="button"
-            className="pv-icon"
-            aria-label={`정렬: ${store.sort === 'popular' ? '저도 궁금해요 많은 순' : '최신순'}. 눌러서 바꾸기`}
-            title={store.sort === 'popular' ? '🙋 많은 순 (눌러서 최신순)' : '최신순 (눌러서 🙋 많은 순)'}
-            onClick={() => store.setSort(store.sort === 'popular' ? 'latest' : 'popular')}
-          >
-            {store.sort === 'popular' ? '🙋⇅' : '🕒⇅'}
-          </button>
-        )}
         {conn}
         {inPip && (
           <button

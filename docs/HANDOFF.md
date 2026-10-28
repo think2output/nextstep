@@ -17,7 +17,7 @@
 1. CLAUDE.md — 절대 규칙 15개와 작업 방식. 어기면 안 된다.
 2. docs/STATUS.md — 현재 단계, 다음 작업 우선순위, 알려진 빈틈, 열린 질문.
 3. docs/architecture.md — 실제 코드·migration·RPC 구조.
-4. docs/PRD.md (v1.7) — 요구사항 원천. 필요한 장만 요구 ID(RESP-02, AT17 등)로 찾아 읽어라.
+4. docs/PRD.md (v1.8) — 요구사항 원천. 필요한 장만 요구 ID(RESP-02, AT17 등)로 찾아 읽어라.
 5. docs/decisions.md — 이미 내린 결정(D-001~D-029). 다시 논쟁하지 말고, 바꾸려면 새 항목을 추가해라.
 
 ## 지금 상태

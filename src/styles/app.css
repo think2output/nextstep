@@ -1433,3 +1433,37 @@ button:disabled {
 .pv-compact .pv-body:has(> .pv-status:not(.pv-status-idle):not(.pv-status-alert)) > .pv-q {
   display: none;
 }
+
+/* ───────── 질문 탭 줄 정리 (사용자 피드백 2026-10-28, D-041) ───────── */
+/* 탭 줄은 응답·질문 탭에서 같은 버튼만, 글자는 꺾이지 않게 */
+.pv-tab,
+.pv-icon,
+.qv-seg button {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* 학생: 쓰기 전에는 빈 머리 줄이 높이를 차지하지 않게 */
+.qv-head-empty {
+  display: none;
+}
+
+.qv-compose .qv-sort {
+  height: 32px;
+}
+
+/* 더 작게(200×120): 필터·답변 완료 글자를 조금 줄여 정렬과 한 줄에 */
+.pv-compact .qv-seg button {
+  padding: 0 6px;
+}
+
+.pv-compact .qv-compose .qv-input {
+  padding: 6px 8px;
+}
+
+/* 입력칸 안내 글자도 꺾이지 않게 (좁으면 말줄임) */
+.qv-input::placeholder {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
