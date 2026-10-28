@@ -3,7 +3,7 @@
 젭에서 수업을 듣고 VS Code로 실습하는 수강생이, 작업 화면 위에 떠 있는 작은 창(Document Picture-in-Picture)에서
 상태를 한 번의 클릭으로 전달하고 익명 질문을 남기는 수업 소통 도구. 제품명은 가칭.
 
-> 상태: 로컬에서 핵심 흐름 동작, **아직 배포 전**. 진행 상황은 [`docs/STATUS.md`](docs/STATUS.md).
+> 상태: 배포 주소 https://nextstep-smoky.vercel.app (Vercel, HTTPS). 진행 상황은 [`docs/STATUS.md`](docs/STATUS.md).
 
 ## 기능
 
@@ -73,7 +73,7 @@ npx supabase db query --linked "insert into private.app_secrets(name, value) val
 
 ```bash
 npm test          # tests/db: 원격 Supabase에 익명 사용자를 만들어 RPC·권한·익명성 검사 (실행당 익명 로그인 약 60회)
-npm run smoke     # tests/e2e: npm run dev 켜둔 상태에서 설치된 Chrome(헤드리스)으로 강사·학생 흐름
+npm run smoke     # tests/e2e: npm run dev 켜둔 상태에서 설치된 Chrome(헤드리스)으로 강사·학생 흐름 (BASE_URL=배포주소 로 배포본 시험)
 npm run build     # 타입 검사 + 빌드
 npm run lint
 ```
@@ -82,7 +82,23 @@ npm run lint
 
 ## 배포
 
-_미작성. Vercel(HTTPS)로 배포 예정이며 `vercel.json`(모든 경로 → index.html)만 준비되어 있다. 실제로 배포한 뒤 절차를 적는다._
+운영 주소: https://nextstep-smoky.vercel.app (Vercel). 아래는 2026-10-28에 실제로 실행한 절차다.
+
+```bash
+npx vercel login                                  # 브라우저에서 기기 코드 승인 (토큰을 복사·공유하지 않는다)
+npx vercel link --yes --project nextstep          # 프로젝트 생성·연결 (GitHub 저장소도 연결됨 → main push마다 자동 배포)
+npx vercel env add VITE_SUPABASE_URL production   # 값은 입력창(stdin)으로. preview도 같은 방법
+npx vercel env add VITE_SUPABASE_PUBLISHABLE_KEY production
+npx vercel deploy --prod                          # 수동 배포
+```
+
+- 환경변수는 위 2개만 넣는다. `PILOT_CODE`·service_role key는 넣지 않는다.
+- `vercel.json`: 모든 경로 → `index.html` (`/join?code=…`, `/room/<id>` 직접 접속·새로고침용).
+- `.vercelignore`: CLI 업로드에서 `.env*`·`node_modules`·`tests` 등을 뺀다.
+- `/gate` 시험 페이지는 개발 모드에서만 열린다(배포 빌드에 포함 안 됨).
+- Supabase Auth 주소: `supabase/config.toml`의 `site_url`·`additional_redirect_urls`에 배포 주소를 넣고 `npx supabase config push` (차이 출력 확인 후 적용).
+- 배포 후 비밀값 검사(AT59): `dist/assets/*.js`에서 PILOT_CODE 값·`service_role`·`sb_secret_` 검색. `sb_secret_` 1건은 supabase-js의 키 형식 검사 문자열이다.
+- 배포 주소로 연기 시험: `BASE_URL=https://nextstep-smoky.vercel.app npm run smoke`
 
 ## 기술 구조
 

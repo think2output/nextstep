@@ -25,7 +25,7 @@ Supabase (프로젝트 rumytuhqrrpdvtojokpz, Tokyo)
 
 | 경로 | 역할 |
 |---|---|
-| `src/App.tsx`, `src/app/router.ts` | 라우팅: `/` 시작, `/join?code=` 참여 링크, `/room/<uuid>` 방, `/gate` GATE-01 시험(lazy) |
+| `src/App.tsx`, `src/app/router.ts` | 라우팅: `/` 시작, `/join?code=` 참여 링크, `/room/<uuid>` 방, `/gate` GATE-01 시험(lazy, 개발 모드에서만 D-030) |
 | `src/pages/StartPage.tsx` | 참여 코드 입장, 강사 방 만들기(파일럿 코드) |
 | `src/pages/RoomPage.tsx` | 방 원래 탭: 참여 코드 공유, 작은 창 열기, 웹 미리보기, 지난 확인 기록, 알림음 설정, 방 종료 |
 | `src/room/useRoom.ts` | snapshot 조회(150ms debounce·최대 500ms), private 채널 구독, 15초 heartbeat, 쓰기 래퍼, 쓰기 잠금 |

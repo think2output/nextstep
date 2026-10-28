@@ -100,5 +100,5 @@ npx supabase db advisors --linked         # 보안·성능 점검
 - DB 변경은 반드시 새 migration 파일로 한다. 이미 적용된 migration 파일을 고치지 않는다.
 - 공개 RPC를 추가하면 rpc migration 끝의 권한 블록처럼 `revoke ... from public, anon` + `grant ... to authenticated`를 함께 넣는다.
 - 파일럿 코드 원문은 `.env.local`의 `PILOT_CODE`(VITE_ 접두사 금지 → 번들에 안 들어감). DB에는 bcrypt 해시만 `private.app_secrets.pilot_code_hash`.
-- 화면: `/` 시작, `/join?code=` 참여 링크, `/room/<id>` 방, `/gate` GATE-01 시험 페이지(시험 전용). 상태는 `src/room/useRoom.ts` 하나가 원래 탭·작은 창 공유.
+- 화면: `/` 시작, `/join?code=` 참여 링크, `/room/<id>` 방, `/gate` GATE-01 시험 페이지(시험 전용, `npm run dev`에서만 열림 D-030). 상태는 `src/room/useRoom.ts` 하나가 원래 탭·작은 창 공유.
 - 디자인 토큰은 `src/styles/tokens.css`(TDS 참고, Toss 로고·이름·전용 폰트 금지). 작은 창 전용 규칙은 `.pip-doc`·`.pv`·`.qv` 아래.

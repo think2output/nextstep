@@ -9,15 +9,17 @@
 - 서버(Supabase): migration 6개 원격 적용, 공개 RPC 14개, private Realtime 채널, 매시 정리 작업.
 - 시험: `npm test`(DB, 35개 통과), `npm run smoke`(헤드리스 Chrome 강사 1·학생 2, 11단계 통과).
 - PRD는 **v1.4** (작은 창 크기·질문 탭·재촉하기 등 사용자 결정 반영).
-- **아직 배포 안 됨** (localhost만). 실제 PiP 창에서의 최신 화면은 사용자가 수동 확인 중.
+- **배포됨**: https://nextstep-smoky.vercel.app (Vercel, main push마다 자동 배포, D-031). 배포 주소 smoke 5회 중 4회 통과·1회 4단계 5초 초과(test-report).
+- `/gate`는 개발 모드에서만 열림(D-030). 실제 PiP 창에서의 최신 화면은 사용자가 수동 확인 중.
 
 ## 다음 작업 (우선순위)
 
-1. **배포 (Vercel, HTTPS)** — 제출 필수. 사용자 Vercel 로그인 필요. `vercel.json`(SPA rewrites) 준비됨. 배포 후 Supabase Auth `site_url`·redirect를 배포 주소로 갱신, README에 실제 실행한 배포 절차 기록.
-2. **Realtime 공개 채널 끄기** — Supabase 대시보드 Realtime 설정 "Allow public access" 끄기(사용자 작업). `/gate` 시험 페이지가 공개 채널을 쓰므로 끄면 /gate 두 창 시험은 동작 안 함 → /gate를 배포 빌드에서 빼거나 그대로 두고 문서에 명시.
-3. **남은 인수 테스트**: AT06(31명 정원), AT56(30명+강사 60분), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계), AT54(크기), AT55(키보드·대비), AT59(빌드에 비밀값 없음), AT60(README만으로 재현). 결과는 `docs/test-report.md`.
-4. **알려진 빈틈** (아래 표) 정리.
-5. DEV09 사용자 비교 테스트(PRD 20장), DEV10 README·발표 자료·시연 영상.
+1. ~~배포~~ 완료 (2026-10-28). Auth `site_url`·redirect 갱신, README 배포 절차, AT59 번들 검사 완료.
+2. **Realtime 공개 채널 끄기** — Supabase 대시보드 Realtime 설정 "Allow public access" 끄기(사용자 작업) → `npm test` Realtime 시험 재확인. /gate는 이미 개발 모드 전용(D-030).
+3. **배포 주소 실기 시험** — 다른 기기에서 학생 입장, GATE-01 G5·G6·G7 → `docs/gate-01.md`. 배포 smoke 1회 실패(학생 요청 수신 5초 초과) 원인 확인(AT47·AT48과 함께).
+4. **남은 인수 테스트**: AT06(31명 정원), AT56(30명+강사 60분), AT25(8초 타임아웃 UI), AT47·AT48(Realtime 유실·재연결), AT51·AT52(24시간 경계), AT54(크기), AT55(키보드·대비), AT59 Network 탭 확인, AT60(README만으로 재현). 결과는 `docs/test-report.md`.
+5. **알려진 빈틈** (아래 표) 정리.
+6. DEV09 사용자 비교 테스트(PRD 20장), DEV10 README·발표 자료·시연 영상.
 
 ## 작업 목록 (PRD 22장)
 
@@ -53,20 +55,21 @@
 | 실제 수강생 OS 분포 | Windows Chrome 우선 | 인터뷰 | 미확인 |
 | 강사 질문 확인 운영 담당 | 쉬는 시간·종료 전 | 인터뷰 | 미확인 |
 | 재촉 알림음 기본값 | 켜짐(학생이 끔) | 사용자 | 확인됨: 사용자 "괜찮았다" (2026-10-28) |
-| 배포 공급자 | Vercel 우선 (D-011) | 사용자 | 계정 연결 대기 |
+| 배포 공급자 | Vercel (D-031) | 사용자 | 확인됨: 사용자 Vercel 로그인·배포 (2026-10-28) |
 
 ## 제출물 (과제 요건)
 
 | 항목 | 필수 | 상태 |
 |---|---|---|
-| GitHub 주소 (코드 + README 실행 방법) | 필수 | https://github.com/think2output/nextstep 공개. README 실행법 작성, 배포 절차 미작성 |
+| GitHub 주소 (코드 + README 실행 방법) | 필수 | https://github.com/think2output/nextstep 공개. README 실행법·배포 절차 작성 |
 | 발표 자료 (PPT/PDF) | 필수 | 미착수 |
-| 배포 주소 | 택1 이상 | 미착수 (Vercel) |
+| 배포 주소 | 택1 이상 | https://nextstep-smoky.vercel.app |
 | 시연 영상 1~3분 (핵심 흐름 + 방어 장면) | 택1 이상 | 미착수 |
 
 ## 작업 기록
 
 ### 2026-10-28
+- 배포: Vercel 프로젝트 nextstep(GitHub 연결), 환경변수 VITE_ 2개만, `.vercelignore`로 .env* 업로드 제외, Supabase Auth site_url·redirect에 배포 주소 추가(config push 차이 2항목 확인 후 적용). AT59 번들 검사 부분 통과. /gate 개발 모드 전용(D-030).
 - 저장소 골격(CLAUDE.md, AGENTS.md, docs/*), 원본 PRD를 `docs/PRD.md`로 이동, GitHub 공개 저장소 생성.
 - GATE-01: Vite+React+TS 시험 페이지(`/gate`). 1차(로컬) G1·G2·G3·G4 통과, 2차(두 창 Supabase Broadcast) 요청 31/31 수신·포커스 안 뺏김. 질문 탭 확장 시 창 위치가 밀리는 문제 발견 → 웹은 PiP 위치 지정 불가 → 크기 고정(D-015).
 - 작은 창 UI를 사용자와 반복 시험하며 확정: 240×160 / 더 작게 200×120, 질문 탭은 찾기+쓰기 한 칸, 12px·28px 줄, 🙋 많은 순, 직접 만든 스크롤 막대(기본 스크롤바 드래그 불가). PRD v1.1~v1.2.

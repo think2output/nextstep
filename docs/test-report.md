@@ -11,8 +11,8 @@
 | 항목 | 값 |
 |---|---|
 | 빌드 커밋 | 9de7126 (2026-10-28) |
-| OS / Chrome | |
-| 배포 URL | 미배포. DB = Supabase 프로젝트 rumytuhqrrpdvtojokpz (Tokyo) |
+| OS / Chrome | Windows 11 Home / Chrome 155 (헤드리스 smoke) |
+| 배포 URL | https://nextstep-smoky.vercel.app (Vercel, 2026-10-28). DB = Supabase 프로젝트 rumytuhqrrpdvtojokpz (Tokyo) |
 
 ## 결과
 
@@ -76,7 +76,7 @@
 | AT56 | 30명+강사 60분 | 정합성 유지 | 미실행 | |
 | AT57 | 백그라운드 10분 | 요청·heartbeat 동작 | 미실행 | |
 | AT58 | 화면 공유 관찰 | 공유 범위 확인 | 미실행 | |
-| AT59 | 빌드·네트워크 검사 | secret·파일럿 코드 없음 | 미실행 | |
+| AT59 | 빌드·네트워크 검사 | secret·파일럿 코드 없음 | 부분 통과 | 2026-10-28 자동: 배포 주소에서 받은 JS 번들과 로컬 dist 모두 PILOT_CODE 값 0건, `service_role` 0건, `sb_secret_` 1건은 supabase-js의 키 접두사 검사 코드(키 아님), /gate 코드 0건. Vercel 환경변수는 VITE_ 2개만. 브라우저 Network 탭 확인은 미실행 |
 | AT60 | README 재현 | 타인이 생성·참여·응답 | 미실행 | |
 
 ## 지표 (PRD 3.2) — 미측정
@@ -121,3 +121,14 @@
 | 강사 질문 확인·답변 완료 → 미답변 0 | 통과 |
 
 실제 PiP 창(다른 앱 위)에서의 확인은 사용자 수동 시험(`docs/gate-01.md`)으로 한다. 알림음은 자동 시험하지 않았다.
+
+### 배포 주소 연기 시험 (2026-10-28, `BASE_URL=https://nextstep-smoky.vercel.app npm run smoke`)
+
+| 실행 | 결과 |
+|---|---|
+| 1회 | 실패: 4단계 "학생이 요청 수신"이 5초 안에 화면에 안 뜸 (오류 메시지 없음) |
+| 2~5회 | 11단계 모두 통과 |
+
+같은 날 localhost(dev)·로컬 배포 빌드(`vite preview`)는 각 1회 모두 통과.
+해석(확인 안 됨): 학생 채널 구독이 끝나기 전에 강사 요청 알림이 나갔거나 알림이 늦게 온 경우로 보인다. 앱은 15초 heartbeat의 revision으로 놓친 변경을 복구하도록 설계(PRD 12.2)되어 있으나, 이번 실패에서 15초 안에 복구됐는지는 시험이 5초에서 멈춰 확인하지 못했다. AT47·AT48에서 이어서 확인한다.
+배포 경로 직접 접속: `/`, `/join?code=…`, `/room/<id>`, `/gate` 모두 200 + 앱 HTML (curl). HSTS 헤더 있음. 브라우저 새로고침은 smoke에서 확인하지 않음.

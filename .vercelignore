@@ -1,0 +1,9 @@
+# Vercel CLI 업로드 제외 (비밀값·로컬 산출물이 배포 원본에 섞이지 않게)
+.env*
+!.env.example
+node_modules
+dist
+.vercel
+tests
+seed
+supabase/.temp
