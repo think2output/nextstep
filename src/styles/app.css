@@ -1227,7 +1227,7 @@ button:disabled {
   align-self: flex-start;
 }
 
-/* 학생 선택 버튼: 글자는 한 줄, ✓는 모서리 표시 */
+/* 학생 선택 버튼: 글자는 한 줄 (선택은 진한 색, D-036) */
 .pv-choice {
   position: relative;
   white-space: nowrap;
@@ -1239,14 +1239,6 @@ button:disabled {
   background: var(--blue-50);
   color: var(--blue-700);
   box-shadow: inset 0 0 0 1px var(--blue-500);
-}
-
-.pv-choice-check {
-  position: absolute;
-  top: 2px;
-  right: 5px;
-  font-size: 10px;
-  line-height: 1;
 }
 
 .pv-compact .pv-choice {
@@ -1285,13 +1277,29 @@ button:disabled {
   }
 }
 
-/* 작은 창 강사 집계 숫자를 줄여 종료 후 화면(지난 결과 + 다음 확인 버튼)이 스크롤 없이 들어가게 */
+/* 작은 창 강사 집계: 과반 줄을 뺀 만큼 숫자 칸을 크게 (D-037). 240×160 기준, 축소는 아래에서 줄임 */
 .pip-doc .pv-stat {
-  padding: 2px;
+  padding: 4px 2px;
+}
+
+.pip-doc .pv-stat-label {
+  font-size: var(--pip-fs-list);
 }
 
 .pip-doc .pv-stat-num {
-  font-size: 13px;
+  font-size: 18px;
+}
+
+.pip-doc .pv-compact .pv-stat {
+  padding: 2px;
+}
+
+.pip-doc .pv-compact .pv-stat-label {
+  font-size: var(--pip-fs-meta);
+}
+
+.pip-doc .pv-compact .pv-stat-num {
+  font-size: 15px;
 }
 
 .pip-doc .pv-meter {
@@ -1348,4 +1356,36 @@ button:disabled {
 
 .pv-compact .pv-choice-long .pv-label-short {
   display: inline;
+}
+
+/* 확인 종료: 눌러야 하는 버튼이라 색을 넣는다 (사용자 피드백) */
+.pv-action-close {
+  background: var(--blue-500);
+  color: #fff;
+}
+
+.pv-action-close:hover:not(:disabled) {
+  background: var(--blue-600);
+}
+
+.pip-doc .pv-compact .pv-meter {
+  margin-top: 2px;
+}
+
+.pip-doc .pv-compact .pv-stat-label {
+  line-height: 1.15;
+}
+
+/* 진행 중 집계는 240×160에서 남는 높이만큼 더 크게 */
+.pip-doc .pv:not(.pv-compact) .pv-live .pv-stat {
+  padding: 6px 2px;
+}
+
+.pip-doc .pv:not(.pv-compact) .pv-live .pv-stat-num {
+  font-size: 24px;
+}
+
+.pip-doc .pv:not(.pv-compact) .pv-live .pv-meter {
+  height: 8px;
+  margin-top: 6px;
 }

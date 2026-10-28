@@ -52,7 +52,8 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
     )
 
   return (
-    <div className={`pv${compact ? ' pv-compact' : ''}`}>
+    // 크기 전환은 실제 작은 창에서만. 원래 탭 미리보기는 항상 기본 배치
+    <div className={`pv${compact && inPip ? ' pv-compact' : ''}`}>
       {/* 재촉: 빨간 테두리 3번 깜빡인 뒤 응답할 때까지 유지 (D-028). 횟수가 바뀌면 key로 애니메이션 재시작 */}
       {nudge.active && <div key={nudge.key} className="pv-nudge" aria-hidden="true" />}
       <div className="pv-bar">
@@ -80,15 +81,17 @@ export default function PipView({ store, tab, setTab, compact, setCompact, draft
           </button>
         )}
         {conn}
-        <button
-          type="button"
-          className="pv-icon"
-          aria-label={compact ? '기본 크기로' : '더 작게'}
-          title={compact ? '기본 크기로' : '더 작게'}
-          onClick={toggleCompact}
-        >
-          {compact ? '＋' : '−'}
-        </button>
+        {inPip && (
+          <button
+            type="button"
+            className="pv-icon"
+            aria-label={compact ? '기본 크기로' : '더 작게'}
+            title={compact ? '기본 크기로' : '더 작게'}
+            onClick={toggleCompact}
+          >
+            {compact ? '＋' : '−'}
+          </button>
+        )}
         {inPip && (
           <button type="button" className="pv-icon" aria-label="원래 탭으로 돌아가기" title="원래 탭으로 돌아가기" onClick={backToTab}>
             ↗

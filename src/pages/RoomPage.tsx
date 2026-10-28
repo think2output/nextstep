@@ -38,7 +38,8 @@ export default function RoomPage({ roomId }: { roomId: string }) {
   const { snap } = store
   const pip = usePip()
   const [tab, setTab] = useState<PipTab>('answer')
-  const [compact, setCompact] = useState(false)
+  // 작은 창은 가장 작은 200×120으로 연다. ＋로 240×160 (사용자 결정, PRD v1.6 8.2)
+  const [compact, setCompact] = useState(true)
   const [ending, setEnding] = useState(false)
   const [endError, setEndError] = useState<string | null>(null)
   const [soundOn, setSoundOn] = useState(readSound)

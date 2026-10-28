@@ -141,7 +141,7 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
           <button
             key={c}
             type="button"
-            // 보내는 중(선택 예정)은 연한 파랑, 서버 승인 후 진한 파랑 + 모서리 ✓ (RESP-04-1·2). 글자는 한 줄 유지
+            // 보내는 중(선택 예정)은 연한 파랑 테두리, 서버 승인 후 진한 파랑 (RESP-04-1·2, D-036). 글자는 한 줄 유지
             className={`pv-choice${shown === c && pending ? ' pv-choice-pending' : ''}${textLength(label(c)) > LONG_LABEL ? ' pv-choice-long' : ''}`}
             aria-label={label(c)}
             title={label(c)}
@@ -151,7 +151,6 @@ export function StudentAnswer({ store }: { store: RoomStore }) {
           >
             <span className="pv-label-full">{label(c)}</span>
             <span className="pv-label-short">{short(c)}</span>
-            {shown === c && !pending && <span className="pv-choice-check" aria-hidden="true">✓</span>}
           </button>
         ))}
       </div>
@@ -198,14 +197,16 @@ export function HostAnswer({ store }: { store: RoomStore }) {
           </button>
           <button
             type="button"
-            className="pv-action pv-action-grey pv-action-inline"
+            className="pv-action pv-action-inline pv-action-close"
             disabled={!store.canWrite || busy}
             onClick={() => void run('close_round', { p_round_id: active.id })}
           >
             확인 종료
           </button>
         </div>
-        <RoundStats round={active} />
+        <div className="pv-live">
+          <RoundStats round={active} majority={false} />
+        </div>
         {active.target_connection_unknown_count > 0 && (
           <p className="pv-meta">대상 중 연결 미확인 {active.target_connection_unknown_count}명</p>
         )}
@@ -229,7 +230,7 @@ export function HostAnswer({ store }: { store: RoomStore }) {
             </span>
           </div>
           <div className="pv-hide-compact">
-            <RoundStats round={last} />
+            <RoundStats round={last} majority={false} />
           </div>
         </>
       ) : (
@@ -259,7 +260,8 @@ export function HostAnswer({ store }: { store: RoomStore }) {
 
 // 강사 집계: 인원 + 대상 대비 %, 막대(50% 표시선), 과반 안내 (사용자 피드백 3).
 // 분모는 요청 시작 시 고정한 대상 인원 (RESP-02). 색만으로 구분하지 않도록 글자로도 표시.
-export function RoundStats({ round }: { round: HostRound }) {
+// 작은 창은 과반 안내 줄 없이 숫자·막대만 크게 보여준다 (D-037). 대상 인원은 막대 title로
+export function RoundStats({ round, majority: showMajority = true }: { round: HostRound; majority?: boolean }) {
   const t = ROUND_TEXT[round.type]
   const total = round.target_count
   const pct = (n: number) => (total > 0 ? Math.round((n * 100) / total) : 0)
@@ -293,15 +295,18 @@ export function RoundStats({ round }: { round: HostRound }) {
       <div
         className="pv-meter"
         role="img"
-        aria-label={`${t.yesShort} ${pct(round.yes_count)}%, ${t.noShort} ${pct(round.no_count)}%, 미응답 ${pct(round.unanswered_count)}%`}
+        aria-label={`대상 ${total}명 중 ${t.yesShort} ${pct(round.yes_count)}%, ${t.noShort} ${pct(round.no_count)}%, 미응답 ${pct(round.unanswered_count)}%`}
+        title={`대상 ${total}명 · ${majority}`}
       >
         <span className="pv-meter-yes" style={{ width: width(round.yes_count) }} />
         <span className="pv-meter-no" style={{ width: width(round.no_count) }} />
         <i className="pv-meter-half" />
       </div>
-      <p className="pv-majority" title={`대상 ${total}명 중 과반은 ${need}명`}>
-        {majority} · 대상 {total}명
-      </p>
+      {showMajority && (
+        <p className="pv-majority" title={`대상 ${total}명 중 과반은 ${need}명`}>
+          {majority} · 대상 {total}명
+        </p>
+      )}
     </>
   )
 }

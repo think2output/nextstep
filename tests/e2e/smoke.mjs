@@ -68,8 +68,8 @@ try {
   step('학생 응답 승인 후 ‘전송 완료’ 표시')
 
   // 강사: 집계 반영 (대상 1명 중 1명 → 100%, 과반)
-  await host.getByText('✓ 과반이 ‘준비됨’ (100%)').waitFor({ timeout: 5_000 })
-  step('강사 집계 준비됨 1명·100%·과반 표시')
+  await host.locator('.pip-frame [title="준비됐어요 1명 (100%)"]').waitFor({ timeout: 5_000 })
+  step('강사 집계 준비됨 1명·100% 표시')
   await pipShot(host, 'tests/e2e/pip-host-active.png')
 
   // 강사: 확인 종료 → 지난 기록, 학생: 지난 응답 표시
